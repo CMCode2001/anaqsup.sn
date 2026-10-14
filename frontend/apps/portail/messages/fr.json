@@ -198,7 +198,7 @@
     "emptyFiltered": "Aucun document ne correspond à votre recherche. Essayez d'autres mots ou retirez un filtre."
   },
   "PublicationKind": {
-    "RAPPORT_ANNUEL": "Rapport annuel",
+    "RAPPORT_ANNUEL": "Rapport",
     "REFERENTIEL": "Référentiel",
     "GUIDE": "Guide",
     "TEXTE_REGLEMENTAIRE": "Texte réglementaire",
@@ -207,7 +207,7 @@
     "AUTRE": "Autre"
   },
   "PublicationKinds": {
-    "RAPPORT_ANNUEL": "Rapports annuels",
+    "RAPPORT_ANNUEL": "Rapports",
     "REFERENTIEL": "Référentiels",
     "GUIDE": "Guides",
     "TEXTE_REGLEMENTAIRE": "Textes réglementaires",

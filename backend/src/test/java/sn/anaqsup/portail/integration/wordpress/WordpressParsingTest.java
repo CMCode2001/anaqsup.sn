@@ -100,4 +100,13 @@ class WordpressParsingTest {
                 .isEqualTo("https://anaqsup.sn/uploads/Re%CC%81f-prog.pdf");
         assertThat(WordpressParsing.fileName("https://anaqsup.sn/uploads/Re%CC%81f-prog.pdf")).isEqualTo("Réf-prog.pdf");
     }
+
+    @Test
+    void premierPdfDUnArticlePublieCommeActualite() {
+        assertThat(WordpressParsing.firstPdf("""
+                <p><a href="/wp-content/uploads/2023/08/rapport-2014.pdf">Rapport d’activités 2014</a></p>
+                <p><a href="https://anaqsup.sn/autre.PDF">Annexe</a></p>""", "https://anaqsup.sn/"))
+                .contains("https://anaqsup.sn/wp-content/uploads/2023/08/rapport-2014.pdf");
+        assertThat(WordpressParsing.firstPdf("<p>Rapport à venir.</p>", "https://anaqsup.sn/")).isEmpty();
+    }
 }

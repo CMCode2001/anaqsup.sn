@@ -52,6 +52,29 @@ public class LegacyImportRepository {
                 .query(Boolean.class).single();
     }
 
+    /**
+     * Document du même type et du même titre, à la casse, aux accents, aux apostrophes et aux espaces près
+     * (par exemple ajouté à la main dans le back-office avant la reprise).
+     */
+    public boolean hasDocumentTitled(String kind, String title) {
+        return jdbc.sql("""
+                        SELECT EXISTS (SELECT 1 FROM publication
+                                       WHERE kind = :kind AND %1$s = %2$s)""".formatted(normalized("title"), normalized(":title")))
+                .param("kind", kind).param("title", title)
+                .query(Boolean.class).single();
+    }
+
+    /** Article repris par erreur : supprimé (ses mentions « J'aime » avec). @return son adresse, s'il existait */
+    public Optional<String> deleteArticle(long wordpressId) {
+        return jdbc.sql("DELETE FROM news_item WHERE legacy_wordpress_id = :id RETURNING slug").param("id", wordpressId)
+                .query(String.class).optional();
+    }
+
+    private static String normalized(String expression) {
+        // Apostrophes typographiques (’ ‘) ramenées à l'apostrophe droite, espaces multiples à un seul.
+        return "immutable_unaccent(lower(regexp_replace(translate(btrim(%s), '’‘', ''''''), '\\s+', ' ', 'g')))".formatted(expression);
+    }
+
     public boolean documentSlugTaken(String slug) {
         return jdbc.sql("SELECT EXISTS (SELECT 1 FROM publication WHERE slug = :slug)").param("slug", slug)
                 .query(Boolean.class).single();

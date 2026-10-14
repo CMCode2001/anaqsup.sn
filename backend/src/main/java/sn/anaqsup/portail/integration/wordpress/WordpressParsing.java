@@ -149,6 +149,12 @@ final class WordpressParsing {
 
     private static final Pattern SIZE = Pattern.compile("\\s*\\(\\s*[\\d.,]+\\s*(?:ko|mo|kb|mb|o)\\s*\\)\\s*$", Pattern.CASE_INSENSITIVE);
 
+    /** Premier PDF lié dans le texte d'un article (document publié comme actualité), en adresse absolue. */
+    static Optional<String> firstPdf(String contentHtml, String baseUrl) {
+        return Jsoup.parse(contentHtml, baseUrl).select("a[href~=(?i)\\.pdf$]").stream()
+                .map(link -> link.absUrl("href")).filter(url -> !url.isBlank()).findFirst();
+    }
+
     /** « Référentiel d'évaluation institutionnelle (905.72 Ko) » → « Référentiel d'évaluation institutionnelle ». */
     static String documentTitle(String linkText) {
         return SIZE.matcher(linkText.replace(' ', ' ').replaceAll("\\s+", " ").strip()).replaceAll("").strip();
