@@ -32,6 +32,8 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
+          # Fichier d'exclusion propre au Dockerfile du backend (BuildKit), et non un Dockerfile.
+          skip-files: backend/Dockerfile.dockerignore
 
   dependency-review:
     name: Nouvelles dépendances (licences, CVE)
