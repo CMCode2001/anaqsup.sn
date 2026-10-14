@@ -20,12 +20,34 @@ updates:
       # (génération du client d'API) : migration à faire volontairement, quand l'outil la prendra en charge.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+  # Images de base : on reste sur les versions LTS et la branche stable (décision ANAQ-Sup du 14/10/2026).
+  # Les correctifs arrivent par les étiquettes flottantes (24-alpine, 25-jre-alpine, 1.30-alpine…) ;
+  # un changement de version majeure se fait volontairement, à la main.
   - package-ecosystem: docker
     directories: ["/backend", "/frontend/apps/portail", "/frontend/apps/backoffice"]
     schedule: { interval: weekly, day: monday }
+    ignore:
+      # Node 24 LTS (comme @types/node et engines de package.json).
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+      # Java 25 LTS à l'exécution.
+      - dependency-name: "eclipse-temurin"
+        update-types: ["version-update:semver-major"]
+      # Image de construction du backend : alignée à la main sur ./mvnw (Maven) et sur Java 25 LTS.
+      - dependency-name: "maven"
+      # nginx : branche stable (version paire), comme le serveur frontal.
+      - dependency-name: "nginxinc/nginx-unprivileged"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   - package-ecosystem: docker-compose
     directory: /devops/compose
     schedule: { interval: weekly, day: monday }
+    ignore:
+      # nginx : branche stable (1.30) ; la suivante (1.32) s'adopte à la main.
+      - dependency-name: "nginx"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # PostgreSQL : un changement de version majeure demande une migration des données (pg_upgrade).
+      - dependency-name: "postgres"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly, day: monday }
