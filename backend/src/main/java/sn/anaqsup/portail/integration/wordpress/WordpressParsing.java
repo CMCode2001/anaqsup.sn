@@ -34,7 +34,17 @@ final class WordpressParsing {
      * Coopération & partenariats ; Publication (rapports annuels, discours du SE…) → Communiqués ; Actualité,
      * Événements, Non classée → Vie institutionnelle. La coopération l'emporte si un article a plusieurs catégories.
      */
-    static String category(List<String> legacy) {
+    /**
+     * Appels de l'ANAQ-Sup (manifestations d'intérêt, candidatures, recrutements, prolongations de délai) : rubrique
+     * « Appels à candidatures », quelle que soit leur catégorie d'origine (décision ANAQ-Sup du 14/10/2026).
+     */
+    private static final Pattern CALL = Pattern.compile(
+            "appel a (manifestation|candidature|communication)|avis a manifestation|avis d'appel|recrutement|prolongation|prorogation");
+
+    static String category(List<String> legacy, String title) {
+        if (CALL.matcher(plain(title)).find()) {
+            return "appels-a-candidatures";
+        }
         List<String> names = legacy.stream().map(WordpressParsing::plain).toList();
         if (names.stream().anyMatch(n -> n.contains("partenariat") || n.contains("partanariat") || n.contains("accord")
                 || n.contains("visite") || n.contains("cooperation"))) {

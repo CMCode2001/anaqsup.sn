@@ -198,7 +198,7 @@ class WordpressImport implements ApplicationRunner {
                     }
                     boolean created = content.importArticle(new Article(prepared.wordpressId(), WordpressParsing.slug(item.link()),
                             item.title(), emptyToNull(WordpressParsing.summary(item.descriptionHtml())),
-                            WordpressParsing.body(item.contentHtml()), WordpressParsing.category(item.categories()),
+                            WordpressParsing.body(item.contentHtml()), WordpressParsing.category(item.categories(), item.title()),
                             item.publishedAt(), prepared.cover()));
                     (created ? report.imported : report.already).incrementAndGet();
                 } catch (Exception e) {
