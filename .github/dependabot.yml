@@ -11,6 +11,15 @@ updates:
     groups:
       react-next: { patterns: ["react", "react-dom", "next", "eslint-config-next", "@types/react*"] }
       ui: { patterns: ["radix-ui", "lucide-react", "motion", "tailwindcss", "@tailwindcss/*", "tw-animate-css", "shadcn"] }
+    ignore:
+      # Types de Node alignés sur la version d'exécution (Node 24, engines de package.json et images Docker) :
+      # une version majeure plus récente décrirait des API absentes en production.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # TypeScript 7 (compilateur natif) n'expose plus l'API JavaScript dont dépend openapi-typescript
+      # (génération du client d'API) : migration à faire volontairement, quand l'outil la prendra en charge.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: docker
     directories: ["/backend", "/frontend/apps/portail", "/frontend/apps/backoffice"]
     schedule: { interval: weekly, day: monday }
