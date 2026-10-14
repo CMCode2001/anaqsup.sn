@@ -49,8 +49,10 @@ function Editor({ page }: { page: AdminPage }) {
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => setForm((current) => ({ ...current, [key]: value }));
   const isSE = page.slug === SE;
   const isOrgChart = page.slug === "organigramme";
-  // Fiches procédures : texte seul ; chaque intertitre devient une entrée du sommaire sur le site.
-  const isProcedure = page.slug.startsWith("procedure-");
+  // Fiches procédures et pages légales : texte seul. Sur le site, les intertitres des fiches forment un sommaire,
+  // ceux des pages légales sont numérotés automatiquement.
+  const isLegal = page.slug === "mentions-legales" || page.slug === "donnees-personnelles";
+  const isProcedure = page.slug.startsWith("procedure-") || isLegal;
   const texts = IMAGE_TEXTS[isOrgChart ? "organigramme" : "photo"];
 
   const save = useMutation({
@@ -92,7 +94,13 @@ function Editor({ page }: { page: AdminPage }) {
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium">Texte de la page</span>
                 {isOrgChart && <p className="text-xs text-muted-foreground">Affiché seulement tant qu&apos;aucune image d&apos;organigramme n&apos;est téléversée.</p>}
-                {isProcedure && <p className="text-xs text-muted-foreground">Chaque intertitre devient une entrée du sommaire de la fiche, dans cet ordre.</p>}
+                {isProcedure && (
+                  <p className="text-xs text-muted-foreground">
+                    {isLegal
+                      ? "Les intertitres sont numérotés automatiquement sur le site (1., 2., 3.…) : ne les numérotez pas vous-même."
+                      : "Chaque intertitre devient une entrée du sommaire de la fiche, dans cet ordre."}
+                  </p>
+                )}
                 <RichTextEditor label="Texte de la page (français)" value={form.bodyHtml} onChange={(html) => set("bodyHtml", html)} />
               </div>
             </div>

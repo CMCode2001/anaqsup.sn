@@ -52,7 +52,10 @@
     "contactUs": "Nous contacter",
     "writeUs": "Écrire à l'ANAQ-Sup",
     "newTab": "(nouvel onglet)",
-    "copyright": "© {year} {name} — République du Sénégal"
+    "copyright": "© {year} {name} — République du Sénégal",
+    "legal": "Informations légales",
+    "legalNotice": "Mentions légales",
+    "privacy": "Données personnelles"
   },
   "Common": {
     "frenchOnly": "Ce contenu n'est disponible qu'en français.",
@@ -336,5 +339,13 @@
     "title": "Page introuvable",
     "text": "Cette page n'existe pas ou a été déplacée. Les anciennes adresses du site sont redirigées automatiquement ; si vous arrivez ici depuis un lien, recherchez directement :",
     "home": "Retour à l'accueil"
+  },
+  "Legal": {
+    "eyebrow": "Informations légales",
+    "legalNotice": "Mentions légales",
+    "privacy": "Données personnelles",
+    "helpTitle": "Besoin d'aide ?",
+    "helpText": "Une question sur ces informations ou sur vos données personnelles ? L'ANAQ-Sup vous répond.",
+    "contact": "Nous contacter"
   }
 }

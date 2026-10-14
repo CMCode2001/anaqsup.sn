@@ -112,9 +112,16 @@ export async function SiteFooter() {
       </div>
 
       <div className="border-t border-white/10">
-        <p className="mx-auto max-w-7xl px-4 py-5 text-xs text-white/55">
-          {t("Footer.copyright", { year: new Date().getFullYear(), name: site.shortName })}
-        </p>
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between">
+          <p>{t("Footer.copyright", { year: new Date().getFullYear(), name: site.shortName })}</p>
+          {/* Pages légales : texte modifiable dans le back-office (Pages institutionnelles). */}
+          <nav aria-label={t("Footer.legal")}>
+            <ul className="flex flex-wrap gap-x-5 gap-y-2">
+              <li><Link href="/mentions-legales" className="transition-colors hover:text-white">{t("Footer.legalNotice")}</Link></li>
+              <li><Link href="/donnees-personnelles" className="transition-colors hover:text-white">{t("Footer.privacy")}</Link></li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </footer>
   );

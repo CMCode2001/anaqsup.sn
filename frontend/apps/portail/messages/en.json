@@ -52,7 +52,10 @@
     "contactUs": "Contact us",
     "writeUs": "Write to ANAQ-Sup",
     "newTab": "(opens in a new tab)",
-    "copyright": "© {year} {name} — Republic of Senegal"
+    "copyright": "© {year} {name} — Republic of Senegal",
+    "legal": "Legal information",
+    "legalNotice": "Legal notice",
+    "privacy": "Personal data"
   },
   "Common": {
     "frenchOnly": "This content is only available in French.",
@@ -336,5 +339,13 @@
     "title": "Page not found",
     "text": "This page does not exist or has moved. Old addresses of the site are redirected automatically; if you followed a link, search directly:",
     "home": "Back to home"
+  },
+  "Legal": {
+    "eyebrow": "Legal information",
+    "legalNotice": "Legal notice",
+    "privacy": "Personal data",
+    "helpTitle": "Need help?",
+    "helpText": "A question about this information or about your personal data? ANAQ-Sup is here to help.",
+    "contact": "Contact us"
   }
 }
