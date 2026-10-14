@@ -1,0 +1,674 @@
+openapi: 3.1.0
+info:
+  title: API publique ANAQ-Sup
+  version: 1.0.0-draft
+  summary: Contenus du site institutionnel anaqsup.sn et listes des habilitations et accréditations.
+  description: |
+    **Source de vérité** du contrat entre le backend Spring Boot et le portail.
+    Toute évolution passe par une PR sur ce fichier ; le client TypeScript
+    (`frontend/packages/api-client`) est régénéré à partir de lui.
+
+    Périmètre : le site anaqsup.sn uniquement (e-ANAQ est un système distinct, hors périmètre).
+    Les contenus et les avis sont saisis par l'ANAQ-Sup dans le back-office (publication directe).
+
+    Conventions :
+    - noms de champs en anglais (camelCase) ; valeurs d'énumérations métier en français ;
+    - dates au format ISO 8601 (`YYYY-MM-DD`), horodatages en UTC ;
+    - erreurs au format RFC 9457 (`application/problem+json`) ;
+    - toutes les lectures publiques renvoient `Cache-Control` et `ETag`.
+
+    Langues : les contenus éditoriaux acceptent `lang=fr|en` (français par défaut). Sans version
+    anglaise, la version française est renvoyée et le champ `lang` de l'élément vaut `fr` : le portail
+    affiche alors la mention « disponible en français uniquement ».
+  contact:
+    name: ANAQ-Sup
+    url: https://anaqsup.sn/contact
+  license:
+    name: Données publiques ANAQ-Sup (licence à arrêter)
+    url: https://anaqsup.sn/contact
+servers:
+  - url: https://api.anaqsup.sn/api/v1
+    description: Production
+  - url: https://api-staging.anaqsup.sn/api/v1
+    description: Recette
+tags:
+  - name: Actualités
+    description: Actualités publiées et leurs catégories.
+  - name: Événements
+    description: Événements à venir et passés.
+  - name: Publications
+    description: Rapports, référentiels, guides, textes réglementaires, discours.
+  - name: Pages institutionnelles
+    description: Présentation, missions, gouvernance, organigramme, mot du Secrétaire exécutif.
+  - name: Partenaires
+    description: Partenaires de l'ANAQ-Sup (bandeau de l'accueil).
+  - name: Médias
+    description: Images téléversées depuis le back-office.
+  - name: Habilitations
+    description: Établissements et avis d'habilitation.
+  - name: Accréditations
+    description: Formations et avis d'accréditation.
+  - name: Statistiques
+    description: Nombre d'avis favorables publiés.
+  - name: Paramètres du site
+    description: Coordonnées, réseaux sociaux, liens utiles et textes d'introduction modifiés dans le back-office.
+
+paths:
+  /public/news:
+    get:
+      tags: [Actualités]
+      operationId: listNews
+      summary: Actualités publiées, l'article épinglé « À la une » d'abord, puis les plus récentes
+      security: []
+      parameters:
+        - { name: category, in: query, schema: { $ref: '#/components/schemas/Slug' } }
+        - $ref: '#/components/parameters/Lang'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Page d'actualités
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NewsPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /public/news/categories:
+    get:
+      tags: [Actualités]
+      operationId: listNewsCategories
+      summary: Catégories d'actualités (filtres)
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Lang' }]
+      responses:
+        '200':
+          description: Catégories, dans l'ordre d'affichage
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/NewsCategory' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/news/{slug}:
+    get:
+      tags: [Actualités]
+      operationId: getNews
+      summary: Article
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Slug' }, { $ref: '#/components/parameters/Lang' }]
+      responses:
+        '200':
+          description: Article
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NewsItem' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/events:
+    get:
+      tags: [Événements]
+      operationId: listEvents
+      summary: Événements publiés
+      security: []
+      parameters:
+        - { name: period, in: query, description: À venir (date croissante) ou passés (date décroissante), schema: { type: string, enum: [upcoming, past], default: upcoming } }
+        - $ref: '#/components/parameters/Lang'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Page d'événements
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /public/events/{slug}:
+    get:
+      tags: [Événements]
+      operationId: getEvent
+      summary: Fiche d'un événement
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Slug' }, { $ref: '#/components/parameters/Lang' }]
+      responses:
+        '200':
+          description: Événement
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/publications:
+    get:
+      tags: [Publications]
+      operationId: listPublications
+      summary: Documents (ressources documentaires), les plus récents d'abord
+      description: |
+        Recherche `q` : chaque mot doit apparaître dans le titre ou le résumé (français ou anglais),
+        sans tenir compte des accents ni des majuscules.
+      security: []
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: Mots recherchés }
+        - { name: kind, in: query, schema: { $ref: '#/components/schemas/PublicationKind' } }
+        - { name: year, in: query, schema: { type: integer, minimum: 1900, maximum: 2999 }, description: Année du document }
+        - $ref: '#/components/parameters/Lang'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Page de publications
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicationPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /public/publications/years:
+    get:
+      tags: [Publications]
+      operationId: listPublicationYears
+      summary: Années ayant au moins un document publié (du type demandé), la plus récente d'abord
+      security: []
+      parameters:
+        - { name: kind, in: query, schema: { $ref: '#/components/schemas/PublicationKind' } }
+      responses:
+        '200':
+          description: Années, pour le filtre « Année »
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { type: array, items: { type: integer } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /public/pages/{slug}:
+    get:
+      tags: [Pages institutionnelles]
+      operationId: getPage
+      summary: Page institutionnelle (presentation, missions, gouvernance, organigramme, mot-du-secretaire-executif)
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Slug' }, { $ref: '#/components/parameters/Lang' }]
+      responses:
+        '200':
+          description: Page publiée
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InstitutionalPage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/partners:
+    get:
+      tags: [Partenaires]
+      operationId: listPartners
+      summary: Partenaires affichés sur l'accueil, dans l'ordre choisi
+      security: []
+      responses:
+        '200':
+          description: Partenaires
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Partner' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/media/{id}:
+    get:
+      tags: [Médias]
+      operationId: getMedia
+      summary: Image téléversée (photo, logo…), cache d'un an
+      security: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Image PNG, JPEG ou WebP
+          content:
+            image/png: { schema: { type: string, format: binary } }
+            image/jpeg: { schema: { type: string, format: binary } }
+            image/webp: { schema: { type: string, format: binary } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/establishments:
+    get:
+      tags: [Habilitations]
+      operationId: listEstablishments
+      summary: Établissements et avis d'habilitation
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Query'
+        - { name: city, in: query, schema: { type: string, maxLength: 80 } }
+        - { name: kind, in: query, schema: { $ref: '#/components/schemas/EstablishmentKind' } }
+        - { name: avis, in: query, schema: { $ref: '#/components/schemas/Avis' } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Page d'établissements
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EstablishmentPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/establishments/{slug}:
+    get:
+      tags: [Habilitations]
+      operationId: getEstablishment
+      summary: Fiche d'un établissement
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Slug' }]
+      responses:
+        '200':
+          description: Établissement
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Establishment' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/programs:
+    get:
+      tags: [Accréditations]
+      operationId: listPrograms
+      summary: Formations et avis d'accréditation
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Query'
+        - { name: establishment, in: query, description: Slug de l'établissement, schema: { $ref: '#/components/schemas/Slug' } }
+        - { name: level, in: query, schema: { $ref: '#/components/schemas/ProgramLevel' } }
+        - { name: avis, in: query, schema: { $ref: '#/components/schemas/Avis' } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Page de formations
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProgramPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/programs/{slug}:
+    get:
+      tags: [Accréditations]
+      operationId: getProgram
+      summary: Fiche d'une formation
+      security: []
+      parameters: [{ $ref: '#/components/parameters/Slug' }]
+      responses:
+        '200':
+          description: Formation
+          headers: { ETag: { $ref: '#/components/headers/ETag' }, Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Program' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/statistics:
+    get:
+      tags: [Statistiques]
+      operationId: getStatistics
+      summary: Nombre d'avis favorables publiés
+      security: []
+      responses:
+        '200':
+          description: Indicateurs
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statistics' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/settings:
+    get:
+      tags: [Paramètres du site]
+      operationId: getSettings
+      summary: Paramètres du site (bandeau, pied de page, page Contact, textes d'introduction)
+      security: []
+      responses:
+        '200':
+          description: Paramètres
+          headers: { Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SiteSettings' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+components:
+  parameters:
+    Slug:
+      name: slug
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/Slug' }
+    Query:
+      name: q
+      in: query
+      description: Nom, sigle, ville ou domaine (insensible aux accents et tolérant aux fautes)
+      schema: { type: string, maxLength: 100 }
+    Lang:
+      name: lang
+      in: query
+      description: Langue souhaitée ; repli sur le français si la traduction n'existe pas.
+      schema: { $ref: '#/components/schemas/Lang' }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 0, default: 0 }
+    Size:
+      name: size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  headers:
+    ETag:
+      schema: { type: string }
+    CacheControl:
+      schema: { type: string, example: 'public, max-age=300' }
+
+  responses:
+    BadRequest:
+      description: Paramètres invalides
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Ressource introuvable
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    TooManyRequests:
+      description: Limite de débit atteinte
+      headers:
+        Retry-After: { schema: { type: integer } }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Slug:
+      type: string
+      pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+      maxLength: 160
+      description: Identifiant public stable
+
+    Lang:
+      type: string
+      enum: [fr, en]
+      default: fr
+
+    PageMeta:
+      type: object
+      required: [page, size, totalElements, totalPages]
+      properties:
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+
+    # ------------------------------------------------------------------ contenus institutionnels
+
+    NewsCategory:
+      type: object
+      required: [slug, label]
+      properties:
+        slug: { $ref: '#/components/schemas/Slug' }
+        label: { type: string }
+
+    NewsSummary:
+      type: object
+      required: [slug, lang, title, publishedAt, category, featured]
+      properties:
+        slug: { $ref: '#/components/schemas/Slug' }
+        lang: { $ref: '#/components/schemas/Lang', description: Langue du texte renvoyé }
+        title: { type: string }
+        summary: { type: [string, 'null'] }
+        category: { $ref: '#/components/schemas/NewsCategory' }
+        coverImageUrl: { type: [string, 'null'], format: uri-reference, description: Image mise en avant (adresse absolue ou relative au site) }
+        featured: { type: boolean, description: Article épinglé « À la une » par l'éditeur (un seul à la fois ; il est renvoyé en premier) }
+        publishedAt: { type: string, format: date-time }
+
+    NewsItem:
+      allOf:
+        - $ref: '#/components/schemas/NewsSummary'
+        - type: object
+          required: [bodyHtml, updatedAt]
+          properties:
+            bodyHtml: { type: string, description: HTML assaini côté serveur }
+            updatedAt: { type: string, format: date-time, description: Dernière modification }
+            previous:
+              description: 'Article publié juste avant (plus ancien), pour « Article précédent »'
+              oneOf: [{ $ref: '#/components/schemas/NewsLink' }, { type: 'null' }]
+            next:
+              description: 'Article publié juste après (plus récent), pour « Article suivant »'
+              oneOf: [{ $ref: '#/components/schemas/NewsLink' }, { type: 'null' }]
+
+    NewsLink:
+      type: object
+      required: [slug, lang, title]
+      properties:
+        slug: { $ref: '#/components/schemas/Slug' }
+        lang: { $ref: '#/components/schemas/Lang', description: Langue du titre renvoyé }
+        title: { type: string }
+
+    NewsPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/NewsSummary' } }
+        page: { $ref: '#/components/schemas/PageMeta' }
+
+    EventSummary:
+      type: object
+      required: [slug, lang, title, startsAt]
+      properties:
+        slug: { $ref: '#/components/schemas/Slug' }
+        lang: { $ref: '#/components/schemas/Lang', description: Langue du texte renvoyé }
+        title: { type: string }
+        summary: { type: [string, 'null'] }
+        location: { type: [string, 'null'] }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: [string, 'null'], format: date-time }
+        coverImageUrl: { type: [string, 'null'], format: uri }
+
+    Event:
+      allOf:
+        - $ref: '#/components/schemas/EventSummary'
+        - type: object
+          required: [bodyHtml]
+          properties:
+            bodyHtml: { type: string, description: HTML assaini côté serveur }
+
+    EventPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/EventSummary' } }
+        page: { $ref: '#/components/schemas/PageMeta' }
+
+    PublicationKind:
+      type: string
+      enum: [RAPPORT_ANNUEL, REFERENTIEL, GUIDE, TEXTE_REGLEMENTAIRE, DISCOURS, ETUDE, AUTRE]
+
+    Publication:
+      type: object
+      required: [slug, lang, title, kind, publishedOn]
+      properties:
+        slug: { $ref: '#/components/schemas/Slug' }
+        lang: { $ref: '#/components/schemas/Lang', description: Langue du texte renvoyé }
+        title: { type: string }
+        kind: { $ref: '#/components/schemas/PublicationKind' }
+        summary: { type: [string, 'null'] }
+        publishedOn: { type: string, format: date }
+        fileUrl: { type: [string, 'null'], format: uri-reference, description: 'Document (PDF téléversé, servi sous /media/…, ou lien externe)' }
+        fileType: { type: [string, 'null'], description: 'Format du fichier (ex. PDF), s''il est connu' }
+        fileSizeBytes: { type: [integer, 'null'], description: 'Taille du fichier téléversé, en octets' }
+        coverImageUrl: { type: [string, 'null'], format: uri-reference, description: 'Vignette : première page du PDF ou image choisie (/media/…)' }
+
+    PublicationPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/Publication' } }
+        page: { $ref: '#/components/schemas/PageMeta' }
+
+    InstitutionalPage:
+      type: object
+      required: [slug, lang, title, bodyHtml, updatedAt]
+      properties:
+        slug: { $ref: '#/components/schemas/Slug' }
+        lang: { $ref: '#/components/schemas/Lang', description: Langue du texte renvoyé }
+        title: { type: string }
+        summary: { type: [string, 'null'] }
+        bodyHtml: { type: string, description: HTML assaini côté serveur }
+        imageUrl: { type: [string, 'null'], format: uri-reference, description: Photo de la page (ex. le Secrétaire exécutif) }
+        imageName: { type: [string, 'null'], description: 'Nom de la personne en photo (nom propre, non traduit)' }
+        imageRole: { type: [string, 'null'], description: 'Fonction de la personne, dans la langue servie si elle est traduite' }
+        updatedAt: { type: string, format: date-time }
+
+    Partner:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        url: { type: [string, 'null'], format: uri, description: Site officiel du partenaire }
+        logoUrl: { type: [string, 'null'], format: uri-reference, description: Logo (absent tant qu'il n'a pas été fourni) }
+
+    # ------------------------------------------------------------ habilitations et accréditations
+
+    Avis:
+      type: string
+      description: Avis rendu par l'ANAQ-Sup, saisi tel quel (absent si non renseigné).
+      enum: [FAVORABLE, DEFAVORABLE]
+
+    EstablishmentKind:
+      type: string
+      enum: [PUBLIC, PRIVE]
+
+    ProgramLevel:
+      type: string
+      enum: [LICENCE, MASTER, DOCTORAT, DUT, BTS, AUTRE]
+
+    EstablishmentSummary:
+      type: object
+      required: [slug, name, kind]
+      properties:
+        slug: { $ref: '#/components/schemas/Slug' }
+        name: { type: string }
+        acronym: { type: [string, 'null'] }
+        kind: { $ref: '#/components/schemas/EstablishmentKind' }
+        city: { type: [string, 'null'] }
+        habilitationAvis: { oneOf: [{ $ref: '#/components/schemas/Avis' }, { type: 'null' }] }
+        habilitationAvisYear: { type: [integer, 'null'] }
+
+    Establishment:
+      allOf:
+        - $ref: '#/components/schemas/EstablishmentSummary'
+        - type: object
+          required: [programCount]
+          properties:
+            region: { type: [string, 'null'] }
+            website: { type: [string, 'null'], format: uri }
+            programCount: { type: integer }
+
+    EstablishmentPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/EstablishmentSummary' } }
+        page: { $ref: '#/components/schemas/PageMeta' }
+
+    ProgramSummary:
+      type: object
+      required: [slug, title, level, establishment]
+      properties:
+        slug: { $ref: '#/components/schemas/Slug' }
+        title: { type: string }
+        level: { $ref: '#/components/schemas/ProgramLevel' }
+        domain: { type: [string, 'null'] }
+        establishment:
+          type: object
+          required: [slug, name]
+          properties:
+            slug: { $ref: '#/components/schemas/Slug' }
+            name: { type: string }
+        accreditationAvis: { oneOf: [{ $ref: '#/components/schemas/Avis' }, { type: 'null' }] }
+        accreditationAvisYear: { type: [integer, 'null'] }
+
+    Program:
+      $ref: '#/components/schemas/ProgramSummary'
+
+    ProgramPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/ProgramSummary' } }
+        page: { $ref: '#/components/schemas/PageMeta' }
+
+    Statistics:
+      type: object
+      required: [computedAt, habilitatedEstablishments, accreditedPrograms]
+      properties:
+        computedAt: { type: string, format: date-time }
+        habilitatedEstablishments: { type: integer, description: Établissements avec avis d'habilitation favorable }
+        accreditedPrograms: { type: integer, description: Formations avec avis d'accréditation favorable }
+
+    SiteSettings:
+      type: object
+      required: [contact, social, usefulLinks, intros]
+      properties:
+        contact:
+          type: object
+          required: [phone, email, address]
+          properties:
+            phone: { type: string, maxLength: 40 }
+            email: { type: string, format: email, maxLength: 120 }
+            address: { type: string, maxLength: 300 }
+            addressEn: { type: [string, 'null'], maxLength: 300 }
+        social:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            required: [network, url]
+            properties:
+              network: { type: string, enum: [facebook, x, linkedin, youtube] }
+              url: { type: string, maxLength: 300, pattern: '^https://\S+$' }
+        usefulLinks:
+          type: array
+          maxItems: 12
+          items:
+            type: object
+            required: [label, url]
+            properties:
+              label: { type: string, maxLength: 80 }
+              labelEn: { type: [string, 'null'], maxLength: 80 }
+              description: { type: [string, 'null'], maxLength: 200 }
+              descriptionEn: { type: [string, 'null'], maxLength: 200 }
+              url: { type: string, maxLength: 300, pattern: '^https?://\S+$' }
+        intros:
+          type: object
+          description: Textes d'introduction remplacés, par clé (voir introKeys) ; absent = texte d'origine du site
+          additionalProperties:
+            type: object
+            properties:
+              fr: { type: [string, 'null'], maxLength: 600 }
+              en: { type: [string, 'null'], maxLength: 600 }
+
+    Problem:
+      type: object
+      description: RFC 9457
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri, example: 'https://api.anaqsup.sn/problems/not-found' }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+        code: { type: string, example: RESOURCE_NOT_FOUND }

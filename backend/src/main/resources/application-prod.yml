@@ -1,0 +1,19 @@
+# Profil staging + production : journaux structurés (ECS/JSON) prêts pour Loki/ELK.
+logging:
+  structured:
+    format:
+      console: ecs
+  level:
+    root: INFO
+
+spring:
+  flyway:
+    # Jamais de nettoyage du schéma hors développement.
+    clean-disabled: true
+
+server:
+  servlet:
+    session:
+      cookie:
+        # HTTPS uniquement hors développement.
+        secure: true

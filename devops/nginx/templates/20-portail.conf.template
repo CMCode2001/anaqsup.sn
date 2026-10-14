@@ -1,0 +1,51 @@
+# www → apex
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${WWW_HOST};
+    include /etc/nginx/snippets/tls.conf;
+    include /etc/nginx/snippets/hsts.conf;
+    return 301 https://${PUBLIC_HOST}$request_uri;
+}
+
+# Portail public (Next.js)
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${PUBLIC_HOST};
+
+    include /etc/nginx/snippets/tls.conf;
+    include /etc/nginx/snippets/security-headers.conf;
+    # 'unsafe-inline' requis par l'hydratation Next.js ; étape suivante : CSP à nonce via proxy.ts.
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://${API_HOST}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" always;
+
+    # Anciennes URLs WordPress : 301 vers la nouvelle arborescence (avant toute autre règle).
+    if ($legacy_redirect) {
+        return 301 $legacy_redirect;
+    }
+    if ($legacy_gone) {
+        return 410;
+    }
+
+    # Surfaces d'attaque WordPress non redirigées : réponse immédiate, sans solliciter Next.js.
+    location ~* ^/(wp-admin|wp-login\.php|xmlrpc\.php|wp-json|wp-includes|wp-content)(/|$) {
+        return 410;
+    }
+
+    # Webhook de revalidation : appelé par le backend sur le réseau interne uniquement.
+    location = /api/revalidate {
+        return 404;
+    }
+
+    # Mentions « J'aime » des lecteurs : votes limités par adresse IP (voir nginx.conf).
+    location ^~ /api/reactions/ {
+        limit_req zone=reactions burst=10 nodelay;
+        proxy_pass http://portail;
+        include /etc/nginx/snippets/proxy.conf;
+    }
+
+    location / {
+        proxy_pass http://portail;
+        include /etc/nginx/snippets/proxy.conf;
+    }
+}

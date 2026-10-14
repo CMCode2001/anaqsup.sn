@@ -1,0 +1,104 @@
+spring:
+  application:
+    name: anaqsup-backend
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/anaqsup}
+    username: ${DB_USER:anaqsup}
+    password: ${DB_PASSWORD:anaqsup}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+  flyway:
+    locations: classpath:db/migration
+  mvc:
+    problemdetails:
+      enabled: true
+  servlet:
+    multipart:
+      # Back-office : images 5 Mo et documents PDF 30 Mo au plus (limites vérifiées par la médiathèque).
+      max-file-size: 30MB
+      max-request-size: 31MB
+  session:
+    # Back-office : déconnexion après 3 heures d'inactivité (décision ANAQ-Sup du 14/10/2026), et à la
+    # fermeture du navigateur (cookie de session, voir server.servlet.session.cookie).
+    timeout: 3h
+    jdbc:
+      # Sessions du back-office en base : tables créées par Flyway (V13), jamais par Spring Session.
+      initialize-schema: never
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: true
+      republish-outstanding-events-on-restart: true
+
+server:
+  port: 8080
+  shutdown: graceful
+  servlet:
+    session:
+      # Cookie de la session du back-office (durée : spring.session.timeout ; cookie : AdminSecurityConfig).
+      cookie:
+        name: ANAQSUP_SESSION
+        http-only: true
+        same-site: strict
+        secure: ${SESSION_COOKIE_SECURE:false}
+  forward-headers-strategy: framework
+  error:
+    include-stacktrace: never
+    include-message: never
+
+logging:
+  level:
+    # Vignettes des PDF : PDFBox signale chaque police remplacée, sans conséquence sur la vignette.
+    org.apache.pdfbox: error
+    org.apache.fontbox: error
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+springdoc:
+  swagger-ui:
+    path: /docs
+    urls:
+      - name: Contrat public v1 (source de vérité)
+        url: /openapi/public-api.v1.yaml
+      - name: Implémentation (généré)
+        url: /v3/api-docs
+
+anaqsup:
+  cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+  admin:
+    # Premier compte administrateur, créé au démarrage si AUCUN compte n'existe (mot de passe provisoire
+    # à changer à la première connexion). Sans ces variables, aucun compte n'est créé.
+    bootstrap:
+      email: ${ADMIN_BOOTSTRAP_EMAIL:}
+      password: ${ADMIN_BOOTSTRAP_PASSWORD:}
+      name: ${ADMIN_BOOTSTRAP_NAME:Administrateur}
+  media:
+    # Images téléversées (volume « documents », déjà sauvegardé).
+    dir: ${MEDIA_DIR:/var/lib/anaqsup/documents/media}
+  portal:
+    # Webhook signé de revalidation du portail, appelé après chaque modification dans le back-office.
+    revalidate-url: ${PORTAL_REVALIDATE_URL:}
+    revalidate-secret: ${REVALIDATE_SECRET:}
+  translation:
+    # Traduction automatique vers l'anglais (DeepL). Sans clé, les contenus non traduits restent en français.
+    deepl-api-key: ${DEEPL_API_KEY:}
+    # Actualités traduites automatiquement : celles des 12 derniers mois (les archives restent en français).
+    news-max-age-months: 12

@@ -1,0 +1,61 @@
+name: CI · frontend
+
+on:
+  pull_request:
+    paths: ["frontend/**", "contracts/**", ".github/workflows/ci-frontend.yml"]
+  push:
+    branches: [main]
+    paths: ["frontend/**", "contracts/**", ".github/workflows/ci-frontend.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Contrat OpenAPI (lint)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: npx -y @redocly/cli@2.62.2 lint --config contracts/redocly.yaml
+
+  verify:
+    name: Client généré à jour, lint, types, build, budget de performance
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Le client TypeScript correspond au contrat
+        run: |
+          pnpm gen:api
+          git diff --exit-code -- packages/api-client/src/schema.d.ts packages/api-client/src/admin-schema.d.ts \
+            || (echo "::error::Types d'API pas à jour : lancer 'pnpm gen:api' et committer." && exit 1)
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Budget JavaScript (≤ 150 Ko pages de contenu, ≤ 160 Ko accueil)
+        working-directory: frontend/apps/portail
+        run: |
+          # Pages rendues à la requête : on mesure le HTML servi par le build, avec l'API factice du script
+          # (listes vides) à la place du backend.
+          # HOSTNAME=0.0.0.0 comme dans l'image Docker : avec 127.0.0.1, Next.js réécrit l'hôte en
+          # « localhost » et traite la réécriture de langue (/ → /fr) comme externe (boucle de redirection).
+          PORT=3100 HOSTNAME=0.0.0.0 API_INTERNAL_URL=http://127.0.0.1:3199 node .next/standalone/apps/portail/server.js &
+          sleep 3
+          BUDGET_BASE_URL=http://127.0.0.1:3100 BUDGET_STUB_API_PORT=3199 node scripts/check-js-budget.mjs

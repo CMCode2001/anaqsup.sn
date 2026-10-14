@@ -1,0 +1,16 @@
+{
+  "name": "anaqsup-frontend",
+  "private": true,
+  "packageManager": "pnpm@12.11.2",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @anaqsup/portail dev",
+    "dev:backoffice": "pnpm --filter @anaqsup/backoffice dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "gen:api": "pnpm --filter @anaqsup/api-client gen"
+  }
+}

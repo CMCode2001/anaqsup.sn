@@ -1,0 +1,41 @@
+# Surcharge développement local : construction locale, ports exposés,
+# données de DÉMONSTRATION fictives, pas de Nginx/TLS. Projet Docker : anaqsup-sn.
+#   make dev-stack   (pile complète)   ·   make dev-infra   (PostgreSQL seul)
+services:
+  postgres:
+    ports: ["127.0.0.1:5432:5432"]
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,demo
+      # Premier administrateur local (mot de passe provisoire, à changer à la première connexion).
+      ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+      # En local, le portail tourne souvent hors Docker (pnpm dev, port 3000 de la machine).
+      # Avec le conteneur portail : PORTAL_REVALIDATE_URL=http://portail:3000/api/revalidate dans dev.env.
+      PORTAL_REVALIDATE_URL: ${PORTAL_REVALIDATE_URL:-http://host.docker.internal:3000/api/revalidate}
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173,http://localhost:5174
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    ports: ["127.0.0.1:8080:8080"]
+
+  portail:
+    build:
+      context: ../../frontend
+      dockerfile: apps/portail/Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    ports: ["127.0.0.1:3000:3000"]
+
+  backoffice:
+    build:
+      context: ../../frontend
+      dockerfile: apps/backoffice/Dockerfile
+    environment:
+      ADMIN_PATH: ${ADMIN_PATH:?ADMIN_PATH manquant dans devops/env/dev.env}
+    ports: ["127.0.0.1:5174:8080"]
+
+  nginx:
+    profiles: ["edge"]

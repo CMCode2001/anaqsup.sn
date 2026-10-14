@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule: { interval: weekly, day: monday }
+    groups:
+      spring: { patterns: ["org.springframework*"] }
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: { interval: weekly, day: monday }
+    groups:
+      react-next: { patterns: ["react", "react-dom", "next", "eslint-config-next", "@types/react*"] }
+      ui: { patterns: ["radix-ui", "lucide-react", "motion", "tailwindcss", "@tailwindcss/*", "tw-animate-css", "shadcn"] }
+  - package-ecosystem: docker
+    directories: ["/backend", "/frontend/apps/portail", "/frontend/apps/backoffice"]
+    schedule: { interval: weekly, day: monday }
+  - package-ecosystem: docker-compose
+    directory: /devops/compose
+    schedule: { interval: weekly, day: monday }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday }

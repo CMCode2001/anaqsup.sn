@@ -1,0 +1,4 @@
+logging:
+  level:
+    sn.anaqsup: DEBUG
+    org.springframework.security: INFO

@@ -1,0 +1,7 @@
+# Copier en production.ini (ignoré par git) et renseigner l'adresse de la VM de production.
+[anaqsup]
+production ansible_host=0.0.0.0 ansible_user=ubuntu
+
+[anaqsup:vars]
+anaqsup_env=production
+deploy_authorized_keys=["ssh-ed25519 AAAA… ci@github-actions", "ssh-ed25519 AAAA… admin@anaqsup"]

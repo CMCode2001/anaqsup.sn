@@ -1,0 +1,12 @@
+# Fins de ligne LF partout (l'ancien README était en UTF-16/CRLF) ; scripts toujours exécutables sous Linux.
+* text=auto eol=lf
+*.sh text eol=lf
+mvnw text eol=lf
+*.cmd text eol=crlf
+*.png binary
+*.jpg binary
+*.pdf binary
+*.woff2 binary
+pnpm-lock.yaml linguist-generated=true -diff
+frontend/packages/api-client/src/schema.d.ts linguist-generated=true
+devops/nginx/redirects/*.map linguist-generated=true -diff
