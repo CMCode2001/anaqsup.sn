@@ -70,6 +70,10 @@ export const routing = defineRouting({
     },
 
     "/contact": "/contact",
+
+    // Pages légales (pied de page)
+    "/mentions-legales": { fr: "/mentions-legales", en: "/legal-notice" },
+    "/donnees-personnelles": { fr: "/donnees-personnelles", en: "/privacy" },
   },
 });
 

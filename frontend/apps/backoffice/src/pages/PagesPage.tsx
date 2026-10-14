@@ -18,6 +18,8 @@ export const PAGE_INFO: Record<string, { label: string; where: string }> = {
   organigramme: { label: "Organigramme", where: "L'ANAQ-Sup → Organigramme" },
   "procedure-habilitation": { label: "Procédure d'habilitation", where: "Habilitations & accréditations → fiche pratique « Habilitation d'un établissement »" },
   "procedure-accreditation": { label: "Procédure d'accréditation", where: "Habilitations & accréditations → fiche pratique « Accréditation d'un programme »" },
+  "mentions-legales": { label: "Mentions légales", where: "Pied de page → Mentions légales (éléments « [À compléter] » à renseigner)" },
+  "donnees-personnelles": { label: "Données personnelles et cookies", where: "Pied de page → Données personnelles (éléments « [À compléter] » à renseigner)" },
 };
 const ORDER = Object.keys(PAGE_INFO);
 
@@ -27,7 +29,7 @@ export function PagesPage() {
 
   return (
     <section className="space-y-6">
-      <PageTitle title="Pages institutionnelles" description="Textes de la rubrique « L'ANAQ-Sup », le mot du Secrétaire exécutif et les fiches procédures. Publication directe : vos modifications sont en ligne dès l'enregistrement." />
+      <PageTitle title="Pages institutionnelles" description="Textes de la rubrique « L'ANAQ-Sup », le mot du Secrétaire exécutif, les fiches procédures et les pages légales. Publication directe : vos modifications sont en ligne dès l'enregistrement." />
       <ul className="grid gap-4 md:grid-cols-2">
         {pages.isPending && Array.from({ length: 4 }, (_, i) => <li key={i}><Skeleton className="h-32 rounded-3xl" /></li>)}
         {sorted.map((page) => (
