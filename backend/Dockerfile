@@ -2,7 +2,7 @@
 # Contexte de build : RACINE du dépôt (le contrat OpenAPI de contracts/ est embarqué).
 #   docker build -f backend/Dockerfile -t anaqsup-backend .
 
-FROM maven:3.9.16-eclipse-temurin-25 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /workspace
 COPY backend/pom.xml backend/pom.xml
 RUN --mount=type=cache,target=/root/.m2 mvn -B -q -f backend/pom.xml dependency:go-offline
