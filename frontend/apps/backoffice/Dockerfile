@@ -2,7 +2,7 @@
 # Contexte de build : frontend/
 #   docker build -f apps/backoffice/Dockerfile -t anaqsup-backoffice frontend/
 
-FROM node:24-alpine AS build
+FROM node:25-alpine AS build
 RUN npm install -g pnpm@12.11.2
 WORKDIR /repo
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
