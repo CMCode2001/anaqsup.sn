@@ -31,7 +31,7 @@ const KINDS: { value: AdminPublicationKind; label: string; section?: string }[] 
   { value: "TEXTE_REGLEMENTAIRE", label: "Texte réglementaire", section: "Textes réglementaires" },
   { value: "REFERENTIEL", label: "Référentiel", section: "Référentiels" },
   { value: "GUIDE", label: "Guide", section: "Guide d'auto-évaluation" },
-  { value: "RAPPORT_ANNUEL", label: "Rapport annuel" },
+  { value: "RAPPORT_ANNUEL", label: "Rapport" },
   { value: "ETUDE", label: "Étude" },
   { value: "DISCOURS", label: "Discours" },
   { value: "AUTRE", label: "Autre" },

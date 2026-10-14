@@ -34,7 +34,17 @@ final class WordpressParsing {
      * Coopération & partenariats ; Publication (rapports annuels, discours du SE…) → Communiqués ; Actualité,
      * Événements, Non classée → Vie institutionnelle. La coopération l'emporte si un article a plusieurs catégories.
      */
-    static String category(List<String> legacy) {
+    /**
+     * Appels de l'ANAQ-Sup (manifestations d'intérêt, candidatures, recrutements, prolongations de délai) : rubrique
+     * « Appels à candidatures », quelle que soit leur catégorie d'origine (décision ANAQ-Sup du 14/10/2026).
+     */
+    private static final Pattern CALL = Pattern.compile(
+            "appel a (manifestation|candidature|communication)|avis a manifestation|avis d'appel|recrutement|prolongation|prorogation");
+
+    static String category(List<String> legacy, String title) {
+        if (CALL.matcher(plain(title)).find()) {
+            return "appels-a-candidatures";
+        }
         List<String> names = legacy.stream().map(WordpressParsing::plain).toList();
         if (names.stream().anyMatch(n -> n.contains("partenariat") || n.contains("partanariat") || n.contains("accord")
                 || n.contains("visite") || n.contains("cooperation"))) {
@@ -148,6 +158,12 @@ final class WordpressParsing {
     // ------------------------------------------------------------------------------------- documents
 
     private static final Pattern SIZE = Pattern.compile("\\s*\\(\\s*[\\d.,]+\\s*(?:ko|mo|kb|mb|o)\\s*\\)\\s*$", Pattern.CASE_INSENSITIVE);
+
+    /** Premier PDF lié dans le texte d'un article (document publié comme actualité), en adresse absolue. */
+    static Optional<String> firstPdf(String contentHtml, String baseUrl) {
+        return Jsoup.parse(contentHtml, baseUrl).select("a[href~=(?i)\\.pdf$]").stream()
+                .map(link -> link.absUrl("href")).filter(url -> !url.isBlank()).findFirst();
+    }
 
     /** « Référentiel d'évaluation institutionnelle (905.72 Ko) » → « Référentiel d'évaluation institutionnelle ». */
     static String documentTitle(String linkText) {

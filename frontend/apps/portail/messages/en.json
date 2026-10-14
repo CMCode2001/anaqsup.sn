@@ -201,7 +201,7 @@
     "emptyFiltered": "No documents match your search. Try other words or remove a filter."
   },
   "PublicationKind": {
-    "RAPPORT_ANNUEL": "Annual report",
+    "RAPPORT_ANNUEL": "Report",
     "REFERENTIEL": "Quality standard",
     "GUIDE": "Guide",
     "TEXTE_REGLEMENTAIRE": "Regulation",
@@ -210,7 +210,7 @@
     "AUTRE": "Other"
   },
   "PublicationKinds": {
-    "RAPPORT_ANNUEL": "Annual reports",
+    "RAPPORT_ANNUEL": "Reports",
     "REFERENTIEL": "Quality standards",
     "GUIDE": "Guides",
     "TEXTE_REGLEMENTAIRE": "Regulations",

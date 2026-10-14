@@ -27,7 +27,7 @@ function Page({ publication, sizes, className }: { publication: Publication; siz
   );
 }
 
-/** « Rapport annuel · 25 novembre 2024 ». */
+/** « Rapport · 25 novembre 2024 ». */
 async function Meta({ publication, locale }: { publication: Publication; locale: Locale }) {
   const t = await getTranslations("PublicationKind");
   return (
