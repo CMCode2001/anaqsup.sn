@@ -1,0 +1,1451 @@
+openapi: 3.1.0
+info:
+  title: API d'administration ANAQ-Sup
+  version: 1.0.0-draft
+  summary: Back-office anaqsup.sn — connexion, comptes et rôles.
+  description: |
+    Utilisée uniquement par le back-office, servi sur la même origine (adresse d'accès non publiée).
+
+    - **Connexion** : session côté serveur, cookie `ANAQSUP_SESSION` (HttpOnly, SameSite=Strict, Secure en production),
+      30 minutes d'inactivité.
+    - **CSRF** : toute requête qui modifie quelque chose renvoie le cookie `XSRF-TOKEN` dans l'en-tête `X-XSRF-TOKEN`.
+    - **Mot de passe provisoire** : tant qu'il n'est pas changé, seules les routes `/admin/auth/*` répondent
+      (sinon 403, code `PASSWORD_CHANGE_REQUIRED`).
+    - **Droits** : ceux du rôle du compte. Comptes et rôles demandent la permission `COMPTES`.
+    - Erreurs au format RFC 9457 avec un `code` stable.
+  contact:
+    name: ANAQ-Sup
+    url: https://anaqsup.sn/contact
+  license:
+    name: Usage interne ANAQ-Sup
+    url: https://anaqsup.sn/contact
+servers:
+  - url: /api/v1
+    description: Même origine que le back-office
+security:
+  - session: []
+tags:
+  - name: Connexion
+    description: Connexion, compte connecté et changement de mot de passe.
+  - name: Comptes
+    description: Comptes du back-office (permission COMPTES).
+  - name: Rôles
+    description: Rôles et permissions (permission COMPTES).
+  - name: Pages
+    description: Pages institutionnelles (permission PAGES).
+  - name: Partenaires
+    description: Partenaires de l'accueil (permission PARTENAIRES).
+  - name: Documents
+    description: Ressources documentaires (permission DOCUMENTS).
+  - name: Médias
+    description: Téléversement d'images (toute personne connectée) et de documents PDF (permission DOCUMENTS).
+  - name: Actualités
+    description: Actualités et rubriques d'actualités (permission ACTUALITES).
+  - name: Événements
+    description: Agenda des événements (permission EVENEMENTS).
+  - name: Habilitations et accréditations
+    description: Établissements (habilitation) et formations (accréditation), avec l'avis publié (permission AVIS).
+  - name: Paramètres du site
+    description: Coordonnées, réseaux sociaux, liens utiles et textes d'introduction (permission PARAMETRES).
+
+paths:
+  /admin/auth/login:
+    post:
+      tags: [Connexion]
+      operationId: login
+      summary: Connexion par e-mail et mot de passe
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Connecté ; le cookie de session est posé.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /admin/auth/logout:
+    post:
+      tags: [Connexion]
+      operationId: logout
+      summary: Déconnexion
+      responses:
+        '204': { description: Session fermée }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /admin/auth/me:
+    get:
+      tags: [Connexion]
+      operationId: me
+      summary: Compte connecté
+      responses:
+        '200':
+          description: Compte connecté
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/auth/password:
+    post:
+      tags: [Connexion]
+      operationId: changePassword
+      summary: Changer son mot de passe (obligatoire après un mot de passe provisoire)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChangePasswordRequest' }
+      responses:
+        '204': { description: Mot de passe changé }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/accounts:
+    get:
+      tags: [Comptes]
+      operationId: listAccounts
+      summary: Comptes du back-office
+      responses:
+        '200':
+          description: Comptes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Account' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Comptes]
+      operationId: createAccount
+      summary: Créer un compte avec un mot de passe provisoire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateAccountRequest' }
+      responses:
+        '201':
+          description: Compte créé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Account' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /admin/accounts/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    put:
+      tags: [Comptes]
+      operationId: updateAccount
+      summary: Modifier le nom, le rôle ou l'activation d'un compte
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateAccountRequest' }
+      responses:
+        '200':
+          description: Compte modifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Account' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Comptes]
+      operationId: deleteAccount
+      summary: Supprimer un compte
+      responses:
+        '204': { description: Compte supprimé }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /admin/accounts/{id}/password:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Comptes]
+      operationId: resetAccountPassword
+      summary: Attribuer un nouveau mot de passe provisoire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResetPasswordRequest' }
+      responses:
+        '204': { description: Mot de passe provisoire attribué }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/roles:
+    get:
+      tags: [Rôles]
+      operationId: listRoles
+      summary: Rôles et leurs permissions
+      responses:
+        '200':
+          description: Rôles (Administrateur en premier)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Role' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Rôles]
+      operationId: createRole
+      summary: Créer un rôle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleRequest' }
+      responses:
+        '201':
+          description: Rôle créé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /admin/roles/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    put:
+      tags: [Rôles]
+      operationId: updateRole
+      summary: Renommer un rôle ou changer ses permissions (sauf Administrateur)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleRequest' }
+      responses:
+        '200':
+          description: Rôle modifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Rôles]
+      operationId: deleteRole
+      summary: Supprimer un rôle inutilisé (sauf Administrateur)
+      responses:
+        '204': { description: Rôle supprimé }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /admin/pages:
+    get:
+      tags: [Pages]
+      operationId: listPages
+      summary: Pages institutionnelles
+      responses:
+        '200':
+          description: Pages
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PageSummary' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /admin/pages/{slug}:
+    parameters:
+      - { name: slug, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Pages]
+      operationId: getPage
+      summary: Page à modifier (versions française et anglaise, photo)
+      responses:
+        '200':
+          description: Page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Page' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Pages]
+      operationId: updatePage
+      summary: Enregistrer et publier une page (HTML assaini par le serveur)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PageRequest' }
+      responses:
+        '200':
+          description: Page enregistrée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Page' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/partners:
+    get:
+      tags: [Partenaires]
+      operationId: listAdminPartners
+      summary: Partenaires (affichés et masqués), dans l'ordre d'affichage
+      responses:
+        '200':
+          description: Partenaires
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Partner' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Partenaires]
+      operationId: createPartner
+      summary: Ajouter un partenaire (en fin de liste)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PartnerRequest' }
+      responses:
+        '201':
+          description: Partenaire ajouté
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Partner' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/partners/order:
+    put:
+      tags: [Partenaires]
+      operationId: reorderPartners
+      summary: Nouvel ordre d'affichage (tous les identifiants, une fois chacun)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Partenaires dans le nouvel ordre
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Partner' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/partners/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    put:
+      tags: [Partenaires]
+      operationId: updatePartner
+      summary: Modifier un partenaire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PartnerRequest' }
+      responses:
+        '200':
+          description: Partenaire modifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Partner' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Partenaires]
+      operationId: deletePartner
+      summary: Retirer un partenaire
+      responses:
+        '204': { description: Partenaire retiré }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/publications:
+    get:
+      tags: [Documents]
+      operationId: listAdminPublications
+      summary: Documents (publiés et brouillons), les plus récemment modifiés d'abord
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: Mots du titre }
+        - { name: kind, in: query, schema: { $ref: '#/components/schemas/PublicationKind' } }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+      responses:
+        '200':
+          description: Page de documents
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicationPage' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Documents]
+      operationId: createPublication
+      summary: Ajouter un document (adresse tirée du titre) ; publié directement si demandé
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PublicationRequest' }
+      responses:
+        '201':
+          description: Document ajouté
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Publication' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/publications/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Documents]
+      operationId: getAdminPublication
+      summary: Document à modifier
+      responses:
+        '200':
+          description: Document
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Publication' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Documents]
+      operationId: updatePublication
+      summary: Modifier un document
+      description: |
+        Version anglaise : renvoyée telle quelle, une traduction automatique reste automatique (refaite si le
+        français change) ; modifiée, elle devient une traduction relue, jamais écrasée. Vide, elle sera traduite
+        automatiquement (DeepL) juste après l'enregistrement.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PublicationRequest' }
+      responses:
+        '200':
+          description: Document modifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Publication' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Documents]
+      operationId: deletePublication
+      summary: Supprimer un document du site
+      responses:
+        '204': { description: Document supprimé }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/media/documents:
+    post:
+      tags: [Médias]
+      operationId: uploadDocument
+      summary: Téléverser un document PDF (30 Mo maximum) ; sa vignette est la première page
+      description: |
+        Refus : fichier qui n'est pas un PDF (UNSUPPORTED_DOCUMENT), trop lourd (DOCUMENT_TOO_LARGE),
+        protégé par un mot de passe (PROTECTED_DOCUMENT) ou illisible (UNREADABLE_DOCUMENT).
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: { type: string, format: binary }
+      responses:
+        '201':
+          description: Document enregistré, avec sa vignette (absente si la première page n'a pas pu être rendue)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadedDocument' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /admin/media:
+    post:
+      tags: [Médias]
+      operationId: uploadMedia
+      summary: Téléverser une image (PNG, JPEG ou WebP, 5 Mo maximum)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: { type: string, format: binary }
+      responses:
+        '201':
+          description: Image enregistrée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Uploaded' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/news:
+    get:
+      tags: [Actualités]
+      operationId: listAdminNews
+      summary: Actualités (publiées et brouillons) ; l'article « À la une » d'abord, puis les plus récentes
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: Mots du titre }
+        - { name: category, in: query, schema: { type: string, pattern: '^[a-z0-9]+(-[a-z0-9]+)*$' }, description: Adresse de la rubrique }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+      responses:
+        '200':
+          description: Page d'actualités
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NewsPage' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Actualités]
+      operationId: createNews
+      summary: Ajouter une actualité (adresse tirée du titre) ; publiée directement si demandé
+      description: |
+        « À la une » : un seul article à la fois, épingler celui-ci désépingle l'autre. Refus : rubrique
+        inconnue (UNKNOWN_CATEGORY), image de couverture inconnue (UNKNOWN_MEDIA), version anglaise
+        commencée mais incomplète (ENGLISH_INCOMPLETE).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewsRequest' }
+      responses:
+        '201':
+          description: Actualité ajoutée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/News' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/news/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Actualités]
+      operationId: getAdminNews
+      summary: Actualité à modifier
+      responses:
+        '200':
+          description: Actualité
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/News' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Actualités]
+      operationId: updateNews
+      summary: Modifier une actualité (son adresse ne change pas)
+      description: |
+        Version anglaise : même règle que les documents (traduction automatique refaite si le français change,
+        traduction relue jamais écrasée, vide = traduite automatiquement).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewsRequest' }
+      responses:
+        '200':
+          description: Actualité modifiée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/News' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Actualités]
+      operationId: deleteNews
+      summary: Supprimer une actualité du site
+      responses:
+        '204': { description: Actualité supprimée }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/news/categories:
+    get:
+      tags: [Actualités]
+      operationId: listNewsCategories
+      summary: Rubriques d'actualités, dans l'ordre d'affichage, avec leur nombre d'articles
+      responses:
+        '200':
+          description: Rubriques
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/NewsCategory' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Actualités]
+      operationId: createNewsCategory
+      summary: Ajouter une rubrique (en fin de liste, adresse tirée du libellé)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewsCategoryRequest' }
+      responses:
+        '201':
+          description: Rubrique ajoutée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NewsCategory' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/news/categories/order:
+    put:
+      tags: [Actualités]
+      operationId: reorderNewsCategories
+      summary: Nouvel ordre des rubriques (tous les identifiants, une fois chacun ; sinon INCOMPLETE_ORDER)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Rubriques dans le nouvel ordre
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/NewsCategory' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/news/categories/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    put:
+      tags: [Actualités]
+      operationId: updateNewsCategory
+      summary: Renommer une rubrique (son adresse ne change pas)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewsCategoryRequest' }
+      responses:
+        '200':
+          description: Rubrique renommée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NewsCategory' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Actualités]
+      operationId: deleteNewsCategory
+      summary: Supprimer une rubrique vide
+      description: Refus pour une rubrique du menu (MENU_CATEGORY) ou qui contient des articles (CATEGORY_NOT_EMPTY).
+      responses:
+        '204': { description: Rubrique supprimée }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/events:
+    get:
+      tags: [Événements]
+      operationId: listAdminEvents
+      summary: Événements (publiés et brouillons) ; à venir d'abord (le plus proche en tête), puis passés
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: Mots du titre ou du lieu }
+        - { name: upcoming, in: query, schema: { type: boolean }, description: 'true = à venir, false = passés' }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+      responses:
+        '200':
+          description: Page d'événements
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventPage' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Événements]
+      operationId: createEvent
+      summary: Ajouter un événement ; refus si la fin précède le début (END_BEFORE_START)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventRequest' }
+      responses:
+        '201':
+          description: Événement ajouté
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/events/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Événements]
+      operationId: getAdminEvent
+      summary: Événement à modifier
+      responses:
+        '200':
+          description: Événement
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Événements]
+      operationId: updateEvent
+      summary: Modifier un événement (son adresse ne change pas)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventRequest' }
+      responses:
+        '200':
+          description: Événement modifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Événements]
+      operationId: deleteEvent
+      summary: Supprimer un événement du site
+      responses:
+        '204': { description: Événement supprimé }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/registry/establishments:
+    get:
+      tags: [Habilitations et accréditations]
+      operationId: listAdminEstablishments
+      summary: Établissements, par ordre alphabétique du sigle (ou du nom)
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: 'Nom, sigle ou ville' }
+        - { name: avis, in: query, schema: { type: string, enum: [FAVORABLE, DEFAVORABLE, AUCUN] }, description: 'AUCUN = sans avis publié' }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 20 } }
+      responses:
+        '200':
+          description: Page d'établissements
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EstablishmentPage' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Habilitations et accréditations]
+      operationId: createEstablishment
+      summary: Ajouter un établissement
+      description: Avis et année vont ensemble (AVIS_INCOMPLETE) ; site web en http(s) (INVALID_URL).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EstablishmentRequest' }
+      responses:
+        '201':
+          description: Établissement ajouté
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Establishment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/registry/establishments/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Habilitations et accréditations]
+      operationId: getAdminEstablishment
+      summary: Établissement à modifier
+      responses:
+        '200':
+          description: Établissement
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Establishment' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Habilitations et accréditations]
+      operationId: updateEstablishment
+      summary: Modifier un établissement (son adresse ne change pas)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EstablishmentRequest' }
+      responses:
+        '200':
+          description: Établissement modifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Establishment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Habilitations et accréditations]
+      operationId: deleteEstablishment
+      summary: Supprimer un établissement sans formation (sinon ESTABLISHMENT_HAS_PROGRAMS)
+      responses:
+        '204': { description: Établissement supprimé }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/registry/programs:
+    get:
+      tags: [Habilitations et accréditations]
+      operationId: listAdminPrograms
+      summary: Formations, groupées par établissement (ordre alphabétique)
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: 'Intitulé, domaine ou établissement' }
+        - { name: establishment, in: query, schema: { type: string, format: uuid } }
+        - { name: avis, in: query, schema: { type: string, enum: [FAVORABLE, DEFAVORABLE, AUCUN] }, description: 'AUCUN = sans avis publié' }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 20 } }
+      responses:
+        '200':
+          description: Page de formations
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProgramPage' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Habilitations et accréditations]
+      operationId: createProgram
+      summary: Ajouter une formation
+      description: Avis et année vont ensemble (AVIS_INCOMPLETE) ; établissement existant (UNKNOWN_ESTABLISHMENT).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProgramRequest' }
+      responses:
+        '201':
+          description: Formation ajoutée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Program' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /admin/registry/programs/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Habilitations et accréditations]
+      operationId: getAdminProgram
+      summary: Formation à modifier
+      responses:
+        '200':
+          description: Formation
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Program' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Habilitations et accréditations]
+      operationId: updateProgram
+      summary: Modifier une formation (son adresse ne change pas)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProgramRequest' }
+      responses:
+        '200':
+          description: Formation modifiée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Program' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Habilitations et accréditations]
+      operationId: deleteProgram
+      summary: Supprimer une formation
+      responses:
+        '204': { description: Formation supprimée }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/settings:
+    get:
+      tags: [Paramètres du site]
+      operationId: getAdminSettings
+      summary: Paramètres du site et liste des textes d'introduction modifiables
+      responses:
+        '200':
+          description: Paramètres
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminSettings' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      tags: [Paramètres du site]
+      operationId: updateSettings
+      summary: Enregistrer les paramètres du site (tout, d'un bloc)
+      description: |
+        Refus : texte d'introduction inconnu (UNKNOWN_INTRO), réseau social en double (DUPLICATE_NETWORK).
+        Un texte d'introduction vide fait réapparaître le texte d'origine du site.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SiteSettings' }
+      responses:
+        '200':
+          description: Paramètres enregistrés
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminSettings' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+components:
+  securitySchemes:
+    session:
+      type: apiKey
+      in: cookie
+      name: ANAQSUP_SESSION
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    BadRequest:
+      description: Requête invalide (ex. PASSWORD_TOO_SHORT, WRONG_PASSWORD, NO_PERMISSION)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unauthorized:
+      description: Non connecté (UNAUTHENTICATED) ou identifiants incorrects (BAD_CREDENTIALS)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Forbidden:
+      description: Droits insuffisants (FORBIDDEN), mot de passe provisoire à changer (PASSWORD_CHANGE_REQUIRED) ou jeton CSRF absent
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Compte ou rôle introuvable
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Conflict:
+      description: Règle de gestion (EMAIL_TAKEN, SELF_PROTECTED, LAST_ADMINISTRATOR, SYSTEM_ROLE, ROLE_IN_USE, ROLE_NAME_TAKEN)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Permission:
+      type: string
+      description: COMPTES = gérer comptes et rôles ; les autres = publier dans la rubrique.
+      enum: [COMPTES, ACTUALITES, EVENEMENTS, DOCUMENTS, PAGES, AVIS, PARTENAIRES, PARAMETRES]
+
+    RoleRef:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+
+    Me:
+      type: object
+      required: [id, email, displayName, role, permissions, mustChangePassword]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        displayName: { type: string }
+        role: { $ref: '#/components/schemas/RoleRef' }
+        permissions: { type: array, items: { $ref: '#/components/schemas/Permission' }, uniqueItems: true }
+        mustChangePassword: { type: boolean }
+
+    Account:
+      type: object
+      required: [id, email, displayName, role, enabled, mustChangePassword, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        displayName: { type: string }
+        role: { $ref: '#/components/schemas/RoleRef' }
+        enabled: { type: boolean }
+        mustChangePassword: { type: boolean, description: Mot de passe provisoire pas encore changé }
+        lastLoginAt: { type: [string, 'null'], format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    Role:
+      type: object
+      required: [id, name, permissions, system, accountCount]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        permissions: { type: array, items: { $ref: '#/components/schemas/Permission' }, uniqueItems: true }
+        system: { type: boolean, description: Rôle Administrateur (non modifiable) }
+        accountCount: { type: integer }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, maxLength: 254 }
+        password: { type: string, maxLength: 128 }
+
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword: { type: string, maxLength: 128 }
+        newPassword: { type: string, minLength: 8, maxLength: 128 }
+
+    CreateAccountRequest:
+      type: object
+      required: [email, displayName, roleId, temporaryPassword]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        displayName: { type: string, maxLength: 120 }
+        roleId: { type: string, format: uuid }
+        temporaryPassword: { type: string, minLength: 8, maxLength: 128 }
+
+    UpdateAccountRequest:
+      type: object
+      required: [displayName, roleId, enabled]
+      properties:
+        displayName: { type: string, maxLength: 120 }
+        roleId: { type: string, format: uuid }
+        enabled: { type: boolean }
+
+    ResetPasswordRequest:
+      type: object
+      required: [temporaryPassword]
+      properties:
+        temporaryPassword: { type: string, minLength: 8, maxLength: 128 }
+
+    RoleRequest:
+      type: object
+      required: [name, permissions]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 60 }
+        permissions: { type: array, items: { $ref: '#/components/schemas/Permission' }, uniqueItems: true, minItems: 1 }
+
+    PageSummary:
+      type: object
+      required: [slug, title, hasEnglish, hasImage, updatedAt]
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        hasEnglish: { type: boolean }
+        hasImage: { type: boolean }
+        updatedAt: { type: string, format: date-time }
+
+    Page:
+      type: object
+      required: [slug, title, bodyHtml, updatedAt]
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        summary: { type: [string, 'null'], description: Accroche (affichée sur l'accueil pour le mot du Secrétaire exécutif) }
+        bodyHtml: { type: string }
+        titleEn: { type: [string, 'null'] }
+        summaryEn: { type: [string, 'null'] }
+        bodyHtmlEn: { type: [string, 'null'] }
+        imageKey: { type: [string, 'null'] }
+        imageUrl: { type: [string, 'null'], description: Adresse publique de la photo (/media/…) }
+        imageName: { type: [string, 'null'], description: 'Nom de la personne en photo (non traduit), ex. Pr Prénom NOM' }
+        imageRole: { type: [string, 'null'], description: 'Fonction, ex. Secrétaire exécutif de l''ANAQ-Sup' }
+        imageRoleEn: { type: [string, 'null'], description: Fonction en anglais }
+        englishAuto: { type: boolean, description: 'Version anglaise traduite automatiquement (DeepL), pas encore relue' }
+        updatedAt: { type: string, format: date-time }
+
+    PageRequest:
+      type: object
+      required: [title, bodyHtml]
+      properties:
+        title: { type: string, maxLength: 200 }
+        summary: { type: [string, 'null'], maxLength: 1000 }
+        bodyHtml: { type: string, maxLength: 200000 }
+        titleEn: { type: [string, 'null'], maxLength: 200 }
+        summaryEn: { type: [string, 'null'], maxLength: 1000 }
+        bodyHtmlEn: { type: [string, 'null'], maxLength: 200000 }
+        imageKey: { type: [string, 'null'], maxLength: 200 }
+        imageName: { type: [string, 'null'], maxLength: 120 }
+        imageRole: { type: [string, 'null'], maxLength: 200 }
+        imageRoleEn: { type: [string, 'null'], maxLength: 200 }
+
+    Partner:
+      type: object
+      required: [id, name, position, enabled]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        url: { type: [string, 'null'] }
+        logoKey: { type: [string, 'null'] }
+        logoUrl: { type: [string, 'null'] }
+        position: { type: integer }
+        enabled: { type: boolean, description: Affiché sur l'accueil }
+
+    PartnerRequest:
+      type: object
+      required: [name, enabled]
+      properties:
+        name: { type: string, maxLength: 120 }
+        url: { type: [string, 'null'], maxLength: 500 }
+        logoKey: { type: [string, 'null'], maxLength: 200 }
+        enabled: { type: boolean }
+
+    Uploaded:
+      type: object
+      required: [key, url, contentType, sizeBytes]
+      properties:
+        key: { type: string, description: 'Clé à enregistrer dans le contenu (imageKey, logoKey, fileKey, coverKey)' }
+        url: { type: string, description: Adresse publique sur le site (/media/…) }
+        contentType: { type: string }
+        sizeBytes: { type: integer }
+        originalName: { type: [string, 'null'], description: Nom du fichier téléversé }
+
+    UploadedDocument:
+      type: object
+      required: [file]
+      properties:
+        file: { $ref: '#/components/schemas/Uploaded' }
+        thumbnail:
+          description: Vignette générée (JPEG de la première page)
+          oneOf:
+            - { $ref: '#/components/schemas/Uploaded' }
+            - { type: 'null' }
+
+    PublicationKind:
+      type: string
+      enum: [RAPPORT_ANNUEL, REFERENTIEL, GUIDE, TEXTE_REGLEMENTAIRE, DISCOURS, ETUDE, AUTRE]
+
+    Publication:
+      type: object
+      required: [id, slug, title, kind, publishedOn, published, coverGenerated, englishAuto, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        title: { type: string }
+        summary: { type: [string, 'null'] }
+        kind: { $ref: '#/components/schemas/PublicationKind' }
+        publishedOn: { type: string, format: date, description: Date du document }
+        published: { type: boolean, description: Visible sur le site }
+        fileKey: { type: [string, 'null'] }
+        fileUrl: { type: [string, 'null'], description: 'PDF (/media/…) ou lien externe repris de l''ancien site' }
+        fileName: { type: [string, 'null'] }
+        fileSizeBytes: { type: [integer, 'null'] }
+        coverKey: { type: [string, 'null'] }
+        coverUrl: { type: [string, 'null'] }
+        coverGenerated: { type: boolean, description: La vignette est la première page du PDF actuel }
+        titleEn: { type: [string, 'null'] }
+        summaryEn: { type: [string, 'null'] }
+        englishAuto: { type: boolean, description: 'Version anglaise traduite automatiquement (DeepL), pas encore relue' }
+        updatedAt: { type: string, format: date-time }
+
+    PublicationPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/Publication' } }
+        page:
+          type: object
+          required: [page, size, totalElements, totalPages]
+          properties:
+            page: { type: integer }
+            size: { type: integer }
+            totalElements: { type: integer, format: int64 }
+            totalPages: { type: integer }
+
+    PublicationRequest:
+      type: object
+      required: [title, kind, publishedOn, published]
+      properties:
+        title: { type: string, maxLength: 300 }
+        summary: { type: [string, 'null'], maxLength: 1000 }
+        kind: { $ref: '#/components/schemas/PublicationKind' }
+        publishedOn: { type: string, format: date }
+        published: { type: boolean, description: 'Publier sur le site (le PDF est alors obligatoire : DOCUMENT_REQUIRED)' }
+        fileKey: { type: [string, 'null'], maxLength: 64 }
+        coverKey: { type: [string, 'null'], maxLength: 64 }
+        titleEn: { type: [string, 'null'], maxLength: 300 }
+        summaryEn: { type: [string, 'null'], maxLength: 1000 }
+
+    PageInfo:
+      type: object
+      required: [page, size, totalElements, totalPages]
+      properties:
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+
+    News:
+      type: object
+      required: [id, slug, title, bodyHtml, category, categoryLabel, published, featured, englishAuto, legacy, updatedAt, likes, dislikes]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        title: { type: string }
+        summary: { type: [string, 'null'] }
+        bodyHtml: { type: string }
+        category: { type: string, description: Adresse de la rubrique }
+        categoryLabel: { type: string }
+        coverKey: { type: [string, 'null'] }
+        coverUrl: { type: [string, 'null'] }
+        published: { type: boolean, description: Visible sur le site }
+        publishedAt: { type: [string, 'null'], format: date-time }
+        featured: { type: boolean, description: Épinglée en tête du carrousel de l'accueil (une seule à la fois) }
+        titleEn: { type: [string, 'null'] }
+        summaryEn: { type: [string, 'null'] }
+        bodyHtmlEn: { type: [string, 'null'] }
+        englishAuto: { type: boolean, description: 'Version anglaise traduite automatiquement (DeepL), pas encore relue' }
+        legacy: { type: boolean, description: Reprise de l'ancien site anaqsup.sn }
+        updatedAt: { type: string, format: date-time }
+        likes: { type: integer, format: int64, description: Mentions « J'aime » des lecteurs (affichées sur le site) }
+        dislikes: { type: integer, format: int64, description: Mentions « Je n'aime pas » (back-office seulement) }
+
+    NewsPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/News' } }
+        page: { $ref: '#/components/schemas/PageInfo' }
+
+    NewsRequest:
+      type: object
+      required: [title, bodyHtml, category, published, featured]
+      properties:
+        title: { type: string, maxLength: 300 }
+        summary: { type: [string, 'null'], maxLength: 1000 }
+        bodyHtml: { type: string, maxLength: 200000 }
+        category: { type: string, pattern: '^[a-z0-9]+(-[a-z0-9]+)*$' }
+        coverKey: { type: [string, 'null'], maxLength: 200 }
+        published: { type: boolean }
+        publishedAt: { type: [string, 'null'], format: date-time, description: 'Date affichée ; vide = date déjà enregistrée, sinon maintenant' }
+        featured: { type: boolean }
+        titleEn: { type: [string, 'null'], maxLength: 300 }
+        summaryEn: { type: [string, 'null'], maxLength: 1000 }
+        bodyHtmlEn: { type: [string, 'null'], maxLength: 200000 }
+
+    NewsCategory:
+      type: object
+      required: [id, slug, label, position, articles, menu]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        label: { type: string }
+        labelEn: { type: [string, 'null'] }
+        position: { type: integer }
+        articles: { type: integer, format: int64 }
+        menu: { type: boolean, description: Rubrique liée à une page du menu (non supprimable) }
+
+    NewsCategoryRequest:
+      type: object
+      required: [label]
+      properties:
+        label: { type: string, maxLength: 80 }
+        labelEn: { type: [string, 'null'], maxLength: 80 }
+
+    Event:
+      type: object
+      required: [id, slug, title, bodyHtml, startsAt, published, englishAuto, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        title: { type: string }
+        summary: { type: [string, 'null'] }
+        bodyHtml: { type: string }
+        location: { type: [string, 'null'] }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: [string, 'null'], format: date-time }
+        published: { type: boolean }
+        titleEn: { type: [string, 'null'] }
+        summaryEn: { type: [string, 'null'] }
+        bodyHtmlEn: { type: [string, 'null'] }
+        englishAuto: { type: boolean }
+        updatedAt: { type: string, format: date-time }
+
+    EventPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/Event' } }
+        page: { $ref: '#/components/schemas/PageInfo' }
+
+    EventRequest:
+      type: object
+      required: [title, bodyHtml, startsAt, published]
+      properties:
+        title: { type: string, maxLength: 300 }
+        summary: { type: [string, 'null'], maxLength: 1000 }
+        bodyHtml: { type: string, maxLength: 200000 }
+        location: { type: [string, 'null'], maxLength: 200 }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: [string, 'null'], format: date-time }
+        published: { type: boolean }
+        titleEn: { type: [string, 'null'], maxLength: 300 }
+        summaryEn: { type: [string, 'null'], maxLength: 1000 }
+        bodyHtmlEn: { type: [string, 'null'], maxLength: 200000 }
+
+    Avis:
+      type: string
+      enum: [FAVORABLE, DEFAVORABLE]
+
+    Establishment:
+      type: object
+      required: [id, slug, name, kind, programs]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        name: { type: string }
+        acronym: { type: [string, 'null'] }
+        kind: { type: string, enum: [PUBLIC, PRIVE] }
+        city: { type: [string, 'null'] }
+        region: { type: [string, 'null'] }
+        website: { type: [string, 'null'] }
+        avis:
+          oneOf:
+            - { $ref: '#/components/schemas/Avis' }
+            - { type: 'null' }
+        avisYear: { type: [integer, 'null'] }
+        programs: { type: integer, format: int64, description: Nombre de formations }
+
+    EstablishmentPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/Establishment' } }
+        page: { $ref: '#/components/schemas/PageInfo' }
+
+    EstablishmentRequest:
+      type: object
+      required: [name, kind]
+      properties:
+        name: { type: string, maxLength: 300 }
+        acronym: { type: [string, 'null'], maxLength: 40 }
+        kind: { type: string, enum: [PUBLIC, PRIVE] }
+        city: { type: [string, 'null'], maxLength: 120 }
+        region: { type: [string, 'null'], maxLength: 120 }
+        website: { type: [string, 'null'], maxLength: 300 }
+        avis:
+          oneOf:
+            - { $ref: '#/components/schemas/Avis' }
+            - { type: 'null' }
+        avisYear: { type: [integer, 'null'], minimum: 2000, maximum: 2100 }
+
+    ProgramLevel:
+      type: string
+      enum: [LICENCE, MASTER, DOCTORAT, DUT, BTS, AUTRE]
+
+    Program:
+      type: object
+      required: [id, slug, title, level, establishmentId, establishmentName]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        title: { type: string }
+        level: { $ref: '#/components/schemas/ProgramLevel' }
+        domain: { type: [string, 'null'] }
+        establishmentId: { type: string, format: uuid }
+        establishmentName: { type: string }
+        establishmentAcronym: { type: [string, 'null'] }
+        avis:
+          oneOf:
+            - { $ref: '#/components/schemas/Avis' }
+            - { type: 'null' }
+        avisYear: { type: [integer, 'null'] }
+
+    ProgramPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/Program' } }
+        page: { $ref: '#/components/schemas/PageInfo' }
+
+    ProgramRequest:
+      type: object
+      required: [title, level, establishmentId]
+      properties:
+        title: { type: string, maxLength: 300 }
+        level: { $ref: '#/components/schemas/ProgramLevel' }
+        domain: { type: [string, 'null'], maxLength: 200 }
+        establishmentId: { type: string, format: uuid }
+        avis:
+          oneOf:
+            - { $ref: '#/components/schemas/Avis' }
+            - { type: 'null' }
+        avisYear: { type: [integer, 'null'], minimum: 2000, maximum: 2100 }
+
+    SiteSettings:
+      type: object
+      required: [contact, social, usefulLinks, intros]
+      properties:
+        contact:
+          type: object
+          required: [phone, email, address]
+          properties:
+            phone: { type: string, maxLength: 40 }
+            email: { type: string, format: email, maxLength: 120 }
+            address: { type: string, maxLength: 300 }
+            addressEn: { type: [string, 'null'], maxLength: 300 }
+        social:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            required: [network, url]
+            properties:
+              network: { type: string, enum: [facebook, x, linkedin, youtube] }
+              url: { type: string, maxLength: 300, pattern: '^https://\S+$' }
+        usefulLinks:
+          type: array
+          maxItems: 12
+          items:
+            type: object
+            required: [label, url]
+            properties:
+              label: { type: string, maxLength: 80 }
+              labelEn: { type: [string, 'null'], maxLength: 80 }
+              description: { type: [string, 'null'], maxLength: 200 }
+              descriptionEn: { type: [string, 'null'], maxLength: 200 }
+              url: { type: string, maxLength: 300, pattern: '^https?://\S+$' }
+        intros:
+          type: object
+          description: Textes d'introduction remplacés, par clé (voir introKeys) ; absent = texte d'origine du site
+          additionalProperties:
+            type: object
+            properties:
+              fr: { type: [string, 'null'], maxLength: 600 }
+              en: { type: [string, 'null'], maxLength: 600 }
+
+    AdminSettings:
+      type: object
+      required: [settings, introKeys]
+      properties:
+        settings: { $ref: '#/components/schemas/SiteSettings' }
+        introKeys: { type: array, items: { type: string }, description: Textes d'introduction modifiables }
+
+    Problem:
+      type: object
+      description: RFC 9457
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        code: { type: string }

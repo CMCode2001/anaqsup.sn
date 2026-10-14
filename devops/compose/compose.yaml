@@ -1,0 +1,141 @@
+# =============================================================================
+# Pile ANAQ-Sup — définition de référence (staging et production).
+# Les environnements ne diffèrent QUE par leur fichier .env (voir devops/env/).
+#
+#   docker compose --env-file /opt/anaqsup/shared/production.env -f compose.yaml up -d --wait
+# =============================================================================
+name: anaqsup
+
+x-defaults: &defaults
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  logging:
+    driver: json-file
+    options: { max-size: "20m", max-file: "5" }
+
+x-image-tag: &tag ${ANAQSUP_VERSION:?ANAQSUP_VERSION requis (ex. v1.2.0)}
+
+services:
+  postgres:
+    <<: *defaults
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?}
+      # Lu par initdb/00-init-databases.sh au tout premier démarrage uniquement.
+      ANAQSUP_DB_PASSWORD: ${ANAQSUP_DB_PASSWORD:?}
+    volumes:
+      # PostgreSQL 18 : le volume se monte sur /var/lib/postgresql (PGDATA versionné dessous).
+      - pgdata:/var/lib/postgresql
+      - ../postgres/initdb:/docker-entrypoint-initdb.d:ro
+    shm_size: 256mb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d anaqsup"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [data]
+
+  backend:
+    <<: *defaults
+    image: ${REGISTRY:-ghcr.io/cmcode2001}/anaqsup-backend:${ANAQSUP_VERSION}
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/anaqsup
+      DB_USER: anaqsup
+      DB_PASSWORD: ${ANAQSUP_DB_PASSWORD}
+      CORS_ALLOWED_ORIGINS: https://${PUBLIC_HOST:?},https://${ADMIN_HOST:?}
+      # Premier administrateur, créé seulement si aucun compte n'existe (mot de passe provisoire).
+      ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+      # Après une modification dans le back-office, le portail vide son cache (webhook signé, réseau interne).
+      PORTAL_REVALIDATE_URL: http://portail:3000/api/revalidate
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:?}
+      # Traduction automatique vers l'anglais (DeepL). Vide : les contenus non traduits restent en français.
+      DEEPL_API_KEY: ${DEEPL_API_KEY:-}
+    volumes:
+      - documents:/var/lib/anaqsup/documents
+    depends_on:
+      postgres: { condition: service_healthy }
+    deploy:
+      resources:
+        limits: { memory: 1536m }
+    networks: [edge, data]
+
+  portail:
+    <<: *defaults
+    image: ${REGISTRY:-ghcr.io/cmcode2001}/anaqsup-portail:${ANAQSUP_VERSION}
+    environment:
+      API_INTERNAL_URL: http://backend:8080
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:?}
+    volumes:
+      # Cache ISR persistant : les fiches déjà rendues survivent à un redéploiement.
+      - portail-cache:/app/apps/portail/.next/cache
+    deploy:
+      resources:
+        limits: { memory: 768m }
+    networks: [edge]
+
+  backoffice:
+    <<: *defaults
+    image: ${REGISTRY:-ghcr.io/cmcode2001}/anaqsup-backoffice:${ANAQSUP_VERSION}
+    environment:
+      # Adresse d'accès non publiée du back-office : https://${ADMIN_HOST}/${ADMIN_PATH}/
+      ADMIN_PATH: ${ADMIN_PATH:?ADMIN_PATH manquant}
+    read_only: true
+    # conf.d : configuration générée au démarrage depuis le gabarit (ADMIN_PATH), par l'utilisateur
+    # non privilégié de l'image (uid 101).
+    tmpfs: [/tmp, /var/cache/nginx, "/etc/nginx/conf.d:uid=101,gid=101,mode=0755"]
+    networks: [edge]
+
+  nginx:
+    <<: *defaults
+    image: nginx:1.30-alpine
+    ports: ["80:80", "443:443"]
+    environment:
+      NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx/sites
+      PUBLIC_HOST: ${PUBLIC_HOST}
+      WWW_HOST: ${WWW_HOST:?}
+      API_HOST: ${API_HOST:?}
+      ADMIN_HOST: ${ADMIN_HOST}
+      ADMIN_PATH: ${ADMIN_PATH:?ADMIN_PATH manquant}
+      ROBOTS_TAG: ${ROBOTS_TAG:-all}
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/templates:/etc/nginx/templates:ro
+      - ../nginx/snippets:/etc/nginx/snippets:ro
+      - ../nginx/redirects:/etc/nginx/redirects:ro
+      - letsencrypt:/etc/letsencrypt:ro
+      - certbot-webroot:/var/www/certbot:ro
+      - nginx-cache:/var/cache/nginx
+    depends_on:
+      backend: { condition: service_healthy }
+      portail: { condition: service_healthy }
+      backoffice: { condition: service_started }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/healthz >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+    networks: [edge]
+
+  certbot:
+    image: certbot/certbot:v5.8.0
+    profiles: ["tls"]
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+
+volumes:
+  pgdata:
+  documents:
+  portail-cache:
+  nginx-cache:
+  letsencrypt:
+  certbot-webroot:
+
+networks:
+  edge: {}
+  # Réseau des données : aucun accès sortant ni entrant hors des conteneurs rattachés.
+  data:
+    internal: true

@@ -1,0 +1,55 @@
+# Serveur statique interne du back-office (image nginx-unprivileged, port 8080).
+# Gabarit : ${ADMIN_PATH} est remplacé au démarrage du conteneur (envsubst de l'image officielle).
+# Le back-office n'est servi que sous /${ADMIN_PATH}/ : toute autre adresse répond 404, la page de
+# connexion n'a donc pas d'adresse devinable (décision ANAQ-Sup du 13/10/2026).
+# TLS, en-têtes de sécurité et restriction d'accès sont portés par le reverse proxy frontal.
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # L'application calcule toutes ses adresses depuis <base href> (routes, API, images).
+    sub_filter '<base href="/" />' '<base href="/${ADMIN_PATH}/" />';
+    sub_filter_once on;
+
+    location = /healthz {
+        access_log off;
+        return 200 "UP\n";
+    }
+
+    location = /${ADMIN_PATH} {
+        return 301 /${ADMIN_PATH}/;
+    }
+
+    location ^~ /${ADMIN_PATH}/assets/ {
+        rewrite ^/${ADMIN_PATH}/(.*)$ /$1 break;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+
+    # Développement local uniquement (en production, le Nginx frontal route /${ADMIN_PATH}/api/ avant d'arriver ici).
+    # Résolution DNS à la requête : l'image démarre même sans backend.
+    location ^~ /${ADMIN_PATH}/api/ {
+        client_max_body_size 31m;   # documents PDF (30 Mo), comme le Nginx frontal
+        resolver 127.0.0.11 valid=10s ipv6=off;
+        set $backend http://backend:8080;
+        rewrite ^/${ADMIN_PATH}/(api/.*)$ /$1 break;
+        proxy_pass $backend;
+    }
+
+    # Fichiers de l'application (logo…) puis routage côté client : toute route inconnue sert index.html.
+    location ^~ /${ADMIN_PATH}/ {
+        rewrite ^/${ADMIN_PATH}/(.*)$ /$1 break;
+        add_header Cache-Control "no-cache";
+        try_files $uri @app;
+    }
+
+    location @app {
+        add_header Cache-Control "no-cache";
+        rewrite ^ /index.html break;
+    }
+
+    location / {
+        return 404;
+    }
+}

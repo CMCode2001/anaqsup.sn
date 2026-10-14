@@ -1,0 +1,4 @@
+# Généré au démarrage (envsubst). La recette envoie « noindex, nofollow », la production « all ».
+map $host $robots_tag {
+    default "${ROBOTS_TAG}";
+}

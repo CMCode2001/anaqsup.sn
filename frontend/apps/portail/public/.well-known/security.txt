@@ -1,0 +1,4 @@
+Contact: mailto:secretariat@anaqsup.sn
+Expires: 2027-10-13T00:00:00.000Z
+Preferred-Languages: fr, en
+Canonical: https://anaqsup.sn/.well-known/security.txt

@@ -1,0 +1,39 @@
+# Back-office : accès restreint (IP/VPN) + comptes gérés par le backend.
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${ADMIN_HOST};
+
+    include /etc/nginx/snippets/tls.conf;
+    include /etc/nginx/snippets/restricted-access.conf;
+    include /etc/nginx/snippets/security-headers.conf;
+    add_header Content-Security-Policy "default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'" always;
+
+    # Le back-office n'existe que sous /${ADMIN_PATH}/ (adresse non publiée, décision ANAQ-Sup du 13/10/2026) :
+    # https://${ADMIN_HOST}/ et toute autre adresse répondent 404.
+
+    # Connexion : 10 tentatives par minute et par IP (zone « login » de nginx.conf).
+    location = /${ADMIN_PATH}/api/v1/admin/auth/login {
+        limit_req zone=login burst=5 nodelay;
+        limit_req_status 429;
+        proxy_pass http://backend/api/v1/admin/auth/login;
+        include /etc/nginx/snippets/proxy.conf;
+    }
+
+    # API (administration + lectures publiques) : même origine que la SPA, donc aucun CORS nécessaire.
+    location ^~ /${ADMIN_PATH}/api/ {
+        client_max_body_size 50m;   # téléversement de documents
+        limit_req zone=api burst=40 nodelay;
+        proxy_pass http://backend/api/;
+        include /etc/nginx/snippets/proxy.conf;
+    }
+
+    location ^~ /${ADMIN_PATH}/ {
+        proxy_pass http://backoffice;
+        include /etc/nginx/snippets/proxy.conf;
+    }
+
+    location / {
+        return 404;
+    }
+}

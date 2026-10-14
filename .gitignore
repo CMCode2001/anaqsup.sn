@@ -1,0 +1,105 @@
+# =============================================================================
+# anaqsup.sn — fichiers exclus de git
+#
+# Le dépôt est PUBLIC : aucun secret, aucune donnée personnelle, aucune adresse
+# d'accès réelle n'y entre. Les valeurs réelles vivent dans des fichiers ignorés
+# (devops/env/dev.env, staging.env, production.env…) ; seuls les modèles
+# *.example, aux valeurs factices, sont versionnés. Voir README → « Secrets ».
+# =============================================================================
+
+
+# --- 1. Secrets et configuration par environnement ---------------------------
+
+# Variables d'environnement réelles : dev.env, staging.env, production.env,
+# .env, .env.local, .env.production…
+*.env
+.env
+.env.*
+# … sauf les modèles, sans aucune valeur réelle.
+!*.env.example
+!.env.example
+# Exception assumée : valeurs de développement NON secrètes du portail,
+# identiques à devops/env/dev.env.example (secret factice « change-me-dev-only »).
+!frontend/apps/portail/.env.development
+
+# Inventaires Ansible réels (adresses des serveurs, utilisateurs, clés SSH) :
+# seuls les *.ini.example sont versionnés.
+devops/ansible/inventories/*.ini
+devops/ansible/group_vars/*/vault*
+.vault_pass*
+vault-password*
+
+# Clés, certificats et magasins de clés (TLS, SSH, signatures).
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+id_rsa*
+id_ed25519*
+*.secret
+secrets/
+.secrets/
+
+
+# --- 2. Données locales, sauvegardes et exports ------------------------------
+
+# Sauvegardes PostgreSQL et exports (les migrations Flyway *.sql restent versionnées).
+*.dump
+*.backup
+*.sql.gz
+*.tar.gz
+backups/
+# Médias téléversés en local hors Docker (images, PDF du back-office).
+media-local/
+uploads/
+
+
+# --- 3. Backend (Java 25, Maven) ----------------------------------------------
+
+backend/target/
+*.class
+hs_err_pid*.log
+replay_pid*.log
+
+
+# --- 4. Frontend (Node 24, pnpm, Next.js, Vite) -------------------------------
+
+node_modules/
+.pnpm-store/
+.next/
+out/
+next-env.d.ts
+dist/
+*.tsbuildinfo
+.turbo/
+.eslintcache
+.vercel/
+
+
+# --- 5. Tests et rapports ------------------------------------------------------
+
+coverage/
+test-results/
+playwright-report/
+*.lcov
+
+
+# --- 6. Éditeurs, outils et système -------------------------------------------
+
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
+*.swp
+*~
+*.log
+npm-debug.log*
+pnpm-debug.log*

@@ -1,0 +1,31 @@
+# Port 80 : défi ACME + redirection HTTPS. Hôtes inconnus : connexion fermée (444).
+server {
+    listen 80 default_server;
+    server_name _;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "UP\n";
+    }
+    location / {
+        return 444;
+    }
+}
+
+server {
+    listen 80;
+    server_name ${PUBLIC_HOST} ${WWW_HOST} ${API_HOST} ${ADMIN_HOST};
+
+    include /etc/nginx/snippets/acme.conf;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# 443 sans SNI connu : poignée de main TLS refusée (aucun certificat exposé).
+server {
+    listen 443 ssl default_server;
+    ssl_reject_handshake on;
+}

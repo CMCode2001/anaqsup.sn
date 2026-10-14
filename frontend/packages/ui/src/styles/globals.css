@@ -1,0 +1,179 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+@source "../../../apps/**/*.{ts,tsx}";
+@source "../**/*.{ts,tsx}";
+
+/*
+ * Thème ANAQ-Sup — couleurs du LOGOTYPE uniquement (charte : docs/charte/), validées le 13/10/2026 :
+ *   or du logotype #C7B62E (couleur principale : boutons, éléments actifs)
+ *   vert #00853D · jaune #FDEE41 · rouge #E21B22 (drapeau, accents)
+ *   anthracite neutre #24272B (bandeau supérieur, pied de page)
+ * Police : Poppins (titres et texte).
+ * Contrastes vérifiés (WCAG 2.2 AA) :
+ *   texte anthracite sur bouton or 7.3:1 · titres/liens or assombri #6E6414 sur blanc 6.0:1
+ *   blanc sur anthracite 15:1 · texte secondaire #5A5F66 sur blanc 6.4:1 · anneau de focus #6E6414 6.0:1
+ *   L'or pur (#C7B62E) n'est jamais utilisé en texte sur fond clair (2.07:1).
+ */
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Couleurs du logotype */
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-green: var(--brand-green);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-red: var(--brand-red);
+  --color-anthracite: var(--anthracite);
+
+  /* Avis : toujours libellé + icône, jamais la couleur seule (WCAG 1.4.1) */
+  --color-status-ok: var(--status-ok);
+  --color-status-ok-surface: var(--status-ok-surface);
+  --color-status-stop: var(--status-stop);
+  --color-status-stop-surface: var(--status-stop-surface);
+  --color-status-neutral: var(--status-neutral);
+  --color-status-neutral-surface: var(--status-neutral-surface);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Magic UI */
+  --animate-shiny-text: shiny-text 8s infinite;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+  /* Bandeau des partenaires (Magic UI « Marquee », CSS seul) : --duration et --gap posés par le composant. */
+  --animate-marquee: marquee var(--duration) infinite linear;
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-100% - var(--gap))); }
+  }
+  @keyframes shiny-text {
+    0%, 90%, 100% { background-position: calc(-100% - var(--shiny-width)) 0; }
+    30%, 60% { background-position: calc(100% + var(--shiny-width)) 0; }
+  }
+  @keyframes shimmer-slide {
+    to { transform: translate(calc(100cqw - 100%), 0); }
+  }
+  @keyframes spin-around {
+    0% { transform: translateZ(0) rotate(0); }
+    15%, 35% { transform: translateZ(0) rotate(90deg); }
+    65%, 85% { transform: translateZ(0) rotate(270deg); }
+    100% { transform: translateZ(0) rotate(360deg); }
+  }
+}
+
+:root {
+  /* Grands arrondis : cartes rounded-2xl/3xl ; boutons, champs et badges en rounded-full. */
+  --radius: 0.875rem;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.251 0.009 255.6);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.251 0.009 255.6);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.251 0.009 255.6);
+
+  /* Or du logotype : boutons et éléments actifs, texte anthracite dessus. */
+  --primary: oklch(0.768 0.147 101.8);
+  --primary-foreground: oklch(0.271 0.009 255.6);
+  --secondary: oklch(0.971 0.016 99);
+  --secondary-foreground: oklch(0.498 0.096 101.8);
+  --muted: oklch(0.971 0.016 99);
+  --muted-foreground: oklch(0.484 0.013 256.7);
+  --accent: oklch(0.971 0.016 99);
+  --accent-foreground: oklch(0.498 0.096 101.8);
+  --destructive: oklch(0.582 0.226 27);
+  --border: oklch(0.91 0.03 98.5);
+  --input: oklch(0.91 0.03 98.5);
+  --ring: oklch(0.498 0.096 101.8);
+
+  --chart-1: oklch(0.768 0.147 101.8);
+  --chart-2: oklch(0.539 0.147 150.4);
+  --chart-3: oklch(0.582 0.226 27);
+  --chart-4: oklch(0.933 0.18 104.2);
+  --chart-5: oklch(0.498 0.096 101.8);
+
+  /* Back-office : barre latérale anthracite, accents or. */
+  --sidebar: oklch(0.271 0.009 255.6);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.768 0.147 101.8);
+  --sidebar-primary-foreground: oklch(0.271 0.009 255.6);
+  --sidebar-accent: oklch(0.34 0.01 255.6);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.36 0.01 255.6);
+  --sidebar-ring: oklch(0.768 0.147 101.8);
+
+  --brand-gold: oklch(0.768 0.147 101.8);
+  --brand-ink: oklch(0.498 0.096 101.8);
+  --brand-green: oklch(0.539 0.147 150.4);
+  --brand-yellow: oklch(0.933 0.18 104.2);
+  --brand-red: oklch(0.582 0.226 27);
+  --anthracite: oklch(0.271 0.009 255.6);
+
+  --status-ok: oklch(0.424 0.093 159.1);
+  --status-ok-surface: oklch(0.956 0.024 163.1);
+  --status-stop: oklch(0.416 0.146 26.3);
+  --status-stop-surface: oklch(0.948 0.023 17.6);
+  --status-neutral: oklch(0.372 0.039 257.3);
+  --status-neutral-surface: oklch(0.959 0.007 247.9);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background font-sans text-foreground;
+  }
+  h1, h2, h3 {
+    @apply font-heading tracking-tight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

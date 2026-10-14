@@ -1,0 +1,6 @@
+# Contexte = racine du dépôt : n'envoyer au démon que ce dont le backend a besoin.
+*
+!backend/pom.xml
+!backend/src/**
+!contracts/openapi/**
+backend/target

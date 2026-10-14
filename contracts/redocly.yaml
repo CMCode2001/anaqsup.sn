@@ -1,0 +1,14 @@
+extends:
+  - recommended
+
+apis:
+  public@v1:
+    root: openapi/public-api.v1.yaml
+  admin@v1:
+    root: openapi/admin-api.v1.yaml
+
+rules:
+  operation-4xx-response: error
+  no-server-example.com: error
+  # Les lectures publiques sont volontairement anonymes (security: []).
+  security-defined: off

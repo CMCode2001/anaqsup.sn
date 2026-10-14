@@ -1,0 +1,5 @@
+# Profil « demo » : DÉVELOPPEMENT LOCAL UNIQUEMENT. Ajoute un jeu de données fictif
+# (db/demo) pour tester le registre. Jamais activé en recette ni en production.
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/demo
