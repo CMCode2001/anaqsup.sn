@@ -90,7 +90,7 @@ services:
 
   nginx:
     <<: *defaults
-    image: nginx:1.30-alpine
+    image: nginx:1.31-alpine
     ports: ["80:80", "443:443"]
     environment:
       NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx/sites
