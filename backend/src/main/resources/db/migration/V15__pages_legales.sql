@@ -9,8 +9,8 @@ VALUES (
 'Mentions légales',
 'Informations légales sur le site anaqsup.sn : éditeur, hébergement, contenus, propriété intellectuelle et responsabilités.',
 $fr$<h2>Éditeur du site</h2>
-<p>Le site anaqsup.sn est édité par l'Autorité nationale d'Assurance Qualité de l'Enseignement supérieur, de la Recherche et de l'Innovation (ANAQ-Sup), qui relève du Ministère de l'Enseignement supérieur, de la Recherche et de l'Innovation. <strong>[À compléter : statut juridique et texte de création de l'ANAQ-Sup.]</strong></p>
-<ul><li>Adresse : Résidence Adja Aby Gueye, Sacré-Cœur 3 Pyrotechnie, Lot N° R126, Dakar, Sénégal</li><li>Téléphone : +221 33 825 75 18</li><li>Courriel : <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a></li></ul>
+<p>Le présent site est le portail officiel de l'<strong>Autorité nationale d'Assurance Qualité de l'Enseignement supérieur, de la Recherche et de l'Innovation (ANAQ-Sup)</strong>, qui relève du Ministère de l'Enseignement supérieur, de la Recherche et de l'Innovation. <strong>[À compléter : statut juridique et texte de création de l'ANAQ-Sup.]</strong></p>
+<p><strong>Siège :</strong> Résidence Adja Aby Gueye, Sacré-Cœur 3 Pyrotechnie, Lot N° R126, Dakar, Sénégal.<br><strong>Téléphone :</strong> +221 33 825 75 18<br><strong>Courriel :</strong> <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a></p>
 <h2>Directeur de la publication</h2>
 <p><strong>[À compléter : nom et fonction du directeur de la publication, en principe le Secrétaire exécutif de l'ANAQ-Sup.]</strong></p>
 <h2>Hébergement</h2>
@@ -35,8 +35,8 @@ $fr$<h2>Éditeur du site</h2>
 'Legal notice',
 'Legal information about the anaqsup.sn website: publisher, hosting, content, intellectual property and liability.',
 $en$<h2>Website publisher</h2>
-<p>The anaqsup.sn website is published by the National Authority for Quality Assurance in Higher Education, Research and Innovation (ANAQ-Sup), which comes under the Ministry of Higher Education, Research and Innovation. <strong>[To be completed: legal status of ANAQ-Sup and the instrument establishing it.]</strong></p>
-<ul><li>Address: Résidence Adja Aby Gueye, Sacré-Cœur 3 Pyrotechnie, Lot N° R126, Dakar, Senegal</li><li>Telephone: +221 33 825 75 18</li><li>Email: <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a></li></ul>
+<p>This website is the official portal of the <strong>National Authority for Quality Assurance in Higher Education, Research and Innovation (ANAQ-Sup)</strong>, which comes under the Ministry of Higher Education, Research and Innovation. <strong>[To be completed: legal status of ANAQ-Sup and the instrument establishing it.]</strong></p>
+<p><strong>Head office:</strong> Résidence Adja Aby Gueye, Sacré-Cœur 3 Pyrotechnie, Lot N° R126, Dakar, Senegal.<br><strong>Telephone:</strong> +221 33 825 75 18<br><strong>Email:</strong> <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a></p>
 <h2>Publication director</h2>
 <p><strong>[To be completed: name and position of the publication director, normally the Executive Secretary of ANAQ-Sup.]</strong></p>
 <h2>Hosting</h2>
@@ -66,7 +66,8 @@ $en$<h2>Website publisher</h2>
 $fr$<h2>En résumé</h2>
 <ul><li>Vous pouvez consulter tout le site sans créer de compte ni donner d'information personnelle.</li><li>Le site n'utilise ni mesure d'audience, ni publicité, ni cookie de réseau social ou de service tiers. Les polices de caractères sont hébergées sur le site lui-même.</li><li>Un seul cookie peut être déposé chez les lecteurs : celui de la mention « J'aime », et seulement si vous votez.</li></ul>
 <h2>Responsable du traitement</h2>
-<p>ANAQ-Sup, Résidence Adja Aby Gueye, Sacré-Cœur 3 Pyrotechnie, Lot N° R126, Dakar. Contact : <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a>. <strong>[À compléter : référent pour les données personnelles, s'il est désigné.]</strong></p>
+<p>Le responsable du traitement est l'<strong>ANAQ-Sup</strong>.<br><strong>Siège :</strong> Résidence Adja Aby Gueye, Sacré-Cœur 3 Pyrotechnie, Lot N° R126, Dakar, Sénégal.<br><strong>Courriel :</strong> <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a></p>
+<p><strong>[À compléter : référent pour les données personnelles, s'il est désigné.]</strong></p>
 <p>Ces traitements relèvent de la loi n° 2008-12 du 25 janvier 2008 sur la protection des données à caractère personnel. <strong>[À compléter : numéro et date de la déclaration auprès de la Commission de protection des données personnelles (CDP).]</strong></p>
 <h2>Lecteurs du site</h2>
 <h3>Mention « J'aime » des actualités</h3>
@@ -95,7 +96,8 @@ $fr$<h2>En résumé</h2>
 $en$<h2>In brief</h2>
 <ul><li>You can browse the whole website without creating an account or providing any personal information.</li><li>The website uses no audience measurement, no advertising and no social network or third-party cookies. Fonts are hosted on the website itself.</li><li>Only one cookie may be set for readers: the "Like" cookie, and only if you vote.</li></ul>
 <h2>Data controller</h2>
-<p>ANAQ-Sup, Résidence Adja Aby Gueye, Sacré-Cœur 3 Pyrotechnie, Lot N° R126, Dakar. Contact: <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a>. <strong>[To be completed: personal data contact person, if one has been appointed.]</strong></p>
+<p>The data controller is <strong>ANAQ-Sup</strong>.<br><strong>Head office:</strong> Résidence Adja Aby Gueye, Sacré-Cœur 3 Pyrotechnie, Lot N° R126, Dakar, Senegal.<br><strong>Email:</strong> <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a></p>
+<p><strong>[To be completed: personal data contact person, if one has been appointed.]</strong></p>
 <p>This processing is governed by Law No. 2008-12 of 25 January 2008 on the protection of personal data. <strong>[To be completed: number and date of the declaration to the Personal Data Protection Commission (CDP).]</strong></p>
 <h2>Website readers</h2>
 <h3>"Like" on news articles</h3>

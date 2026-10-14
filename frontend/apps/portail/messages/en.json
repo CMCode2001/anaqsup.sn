@@ -342,6 +342,10 @@
   },
   "Legal": {
     "eyebrow": "Legal information",
-    "contents": "Contents"
+    "legalNotice": "Legal notice",
+    "privacy": "Personal data",
+    "helpTitle": "Need help?",
+    "helpText": "A question about this information or about your personal data? ANAQ-Sup is here to help.",
+    "contact": "Contact us"
   }
 }

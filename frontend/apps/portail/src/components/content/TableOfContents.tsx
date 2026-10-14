@@ -4,15 +4,16 @@ export type Heading = { id: string; text: string };
 
 /**
  * Ancre « section-N » sur chaque intertitre (h2) d'un texte saisi dans le back-office, et la liste de ces
- * intertitres pour le sommaire (fiches procédures, pages légales).
+ * intertitres pour le sommaire (fiches procédures, pages légales). `numbered` : intertitres numérotés
+ * (« 1. », « 2. »…) sans que la rédaction ait à le faire.
  */
-export function withAnchors(html: string): { html: string; headings: Heading[] } {
+export function withAnchors(html: string, { numbered = false }: { numbered?: boolean } = {}): { html: string; headings: Heading[] } {
   const headings: Heading[] = [];
   const anchored = html.replace(/<h2(?:\s[^>]*)?>([\s\S]*?)<\/h2>/g, (_, inner: string) => {
     const id = `section-${headings.length + 1}`;
     const text = inner.replace(/<[^>]+>/g, "").replace(/&(#39|[a-z]+);/g, (entity, name: string) => ENTITIES[name] ?? entity).trim();
     headings.push({ id, text });
-    return `<h2 id="${id}">${inner}</h2>`;
+    return `<h2 id="${id}">${numbered ? `${headings.length}. ` : ""}${inner}</h2>`;
   });
   return { html: anchored, headings: headings.filter((h) => h.text) };
 }
