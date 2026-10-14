@@ -2,7 +2,7 @@
 # Contexte de build : frontend/
 #   docker build -f apps/portail/Dockerfile -t anaqsup-portail frontend/
 
-FROM node:24-alpine AS base
+FROM node:26-alpine AS base
 RUN npm install -g pnpm@12.11.2
 WORKDIR /repo
 
@@ -22,7 +22,7 @@ ARG NEXT_PUBLIC_SITE_URL=https://anaqsup.sn
 ENV NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 RUN pnpm --filter @anaqsup/portail build
 
-FROM node:24-alpine AS runtime
+FROM node:26-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 ARG VERSION=dev
