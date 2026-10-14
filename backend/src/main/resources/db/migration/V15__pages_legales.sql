@@ -76,21 +76,17 @@ $fr$<h2>En résumé</h2>
 <p>Comme tout site web, les serveurs enregistrent automatiquement des informations sur chaque visite : adresse IP, date et heure, page demandée, navigateur utilisé. Elles servent à la sécurité du site (protection contre les attaques et les abus) et à la résolution des pannes, et ne sont pas utilisées pour suivre votre navigation. Durée de conservation : <strong>[À compléter.]</strong></p>
 <h3>Réseaux sociaux et partage</h3>
 <p>Les icônes Facebook, X, LinkedIn et YouTube, ainsi que les boutons de partage, sont de simples liens : aucun contenu de ces services n'est chargé sur le site tant que vous ne cliquez pas. Une fois sur leur site, leurs propres règles s'appliquent.</p>
-<h2>Agents de l'ANAQ-Sup (espace de gestion)</h2>
-<p>Pour les personnes qui publient sur le site, l'espace de gestion traite :</p>
-<ul><li>le nom, l'adresse électronique et le rôle de chaque compte ;</li><li>le mot de passe, enregistré sous une forme chiffrée irréversible, qui n'est lisible par personne ;</li><li>la date de dernière connexion et la session en cours, close après 3 heures d'inactivité ou à la fermeture du navigateur.</li></ul>
-<p>Ces données ne sont accessibles qu'aux administrateurs de l'espace de gestion. Durée de conservation après le départ d'un agent : <strong>[À compléter.]</strong></p>
 <h2>Traduction automatique</h2>
 <p>Pour proposer le site en anglais, les textes publiés (actualités, événements, documents, pages) sont traduits automatiquement par le service DeepL (DeepL SE, Allemagne). Seuls ces textes, déjà publics, lui sont transmis : aucune donnée concernant les lecteurs. <strong>[À valider : abonnement DeepL API et ses conditions de confidentialité.]</strong></p>
 <h2>Destinataires et hébergement</h2>
 <p>Les données ne sont ni vendues ni cédées. Elles ne sont accessibles qu'aux agents habilités de l'ANAQ-Sup et à son hébergeur, pour les besoins techniques du service. <strong>[À compléter : hébergeur et pays de stockage des données ; en cas de stockage hors du Sénégal, garanties prévues.]</strong></p>
 <h2>Sécurité</h2>
-<p>Le site n'est accessible qu'en connexion chiffrée (HTTPS). L'espace de gestion est protégé par mot de passe, avec des sessions limitées dans le temps et une protection contre les tentatives de connexion répétées.</p>
+<p>Le site n'est accessible qu'en connexion chiffrée (HTTPS).</p>
 <h2>Vos droits</h2>
 <p>Conformément à la loi n° 2008-12, vous disposez d'un droit d'accès, de rectification, d'opposition et de suppression des données qui vous concernent. Pour l'exercer, écrivez à <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a> en précisant votre demande. Vous pouvez aussi saisir la Commission de protection des données personnelles : <a href="https://www.cdp.sn">www.cdp.sn</a>.</p>
 <h2>Cookies</h2>
-<ul><li><strong>anaqsup_lecteur</strong> (lecteurs) : déposé seulement lors d'un vote « J'aime » ou « Je n'aime pas », pour ne compter qu'un vote par navigateur ; 12 mois.</li><li><strong>ANAQSUP_SESSION</strong> (agents de l'espace de gestion) : maintient la connexion ; supprimé à la fermeture du navigateur, expire après 3 heures d'inactivité.</li><li><strong>XSRF-TOKEN</strong> (agents de l'espace de gestion) : protège les actions contre les requêtes frauduleuses ; durée de la session.</li></ul>
-<p>Ces cookies sont nécessaires au service que vous utilisez ; aucun ne sert à vous suivre ni à faire de la publicité. <strong>[À valider : absence de demande de consentement pour ces cookies.]</strong></p>$fr$,
+<ul><li><strong>anaqsup_lecteur</strong> (lecteurs) : déposé seulement lors d'un vote « J'aime » ou « Je n'aime pas », pour ne compter qu'un vote par navigateur ; 12 mois.</li></ul>
+<p>Ce cookie est nécessaire au service que vous utilisez ; il ne sert ni à vous suivre ni à faire de la publicité. <strong>[À valider : absence de demande de consentement pour ce cookie.]</strong></p>$fr$,
 'Personal data and cookies',
 'What data the anaqsup.sn website processes, why, for how long, and how to exercise your rights.',
 $en$<h2>In brief</h2>
@@ -106,21 +102,17 @@ $en$<h2>In brief</h2>
 <p>Like any website, the servers automatically record information about each visit: IP address, date and time, page requested and browser used. This information is used for the security of the website (protection against attacks and abuse) and for troubleshooting, and is not used to track your browsing. Retention period: <strong>[To be completed.]</strong></p>
 <h3>Social networks and sharing</h3>
 <p>The Facebook, X, LinkedIn and YouTube icons and the share buttons are plain links: no content from these services is loaded on the website unless you click. Once on their website, their own rules apply.</p>
-<h2>ANAQ-Sup staff (management area)</h2>
-<p>For the people who publish on the website, the management area processes:</p>
-<ul><li>the name, email address and role of each account;</li><li>the password, stored in an irreversibly encrypted form that nobody can read;</li><li>the date of last login and the current session, which ends after 3 hours of inactivity or when the browser is closed.</li></ul>
-<p>This data is accessible only to the administrators of the management area. Retention period after a staff member leaves: <strong>[To be completed.]</strong></p>
 <h2>Automatic translation</h2>
 <p>To offer the website in English, published texts (news, events, documents, pages) are automatically translated by the DeepL service (DeepL SE, Germany). Only these texts, which are already public, are sent to it: no data about readers. <strong>[To be confirmed: DeepL API subscription and its confidentiality terms.]</strong></p>
 <h2>Recipients and hosting</h2>
 <p>The data is neither sold nor transferred. It is accessible only to authorised ANAQ-Sup staff and to its hosting provider, for the technical needs of the service. <strong>[To be completed: hosting provider and country where the data is stored; if it is stored outside Senegal, the safeguards in place.]</strong></p>
 <h2>Security</h2>
-<p>The website is accessible only over an encrypted connection (HTTPS). The management area is password-protected, with time-limited sessions and protection against repeated login attempts.</p>
+<p>The website is accessible only over an encrypted connection (HTTPS).</p>
 <h2>Your rights</h2>
 <p>In accordance with Law No. 2008-12, you have the right to access, rectify, object to and delete data concerning you. To exercise these rights, write to <a href="mailto:secretariat@anaqsup.sn">secretariat@anaqsup.sn</a>, stating your request. You may also contact the Personal Data Protection Commission: <a href="https://www.cdp.sn">www.cdp.sn</a>.</p>
 <h2>Cookies</h2>
-<ul><li><strong>anaqsup_lecteur</strong> (readers): set only when you vote "Like" or "Dislike", to count one vote per browser; 12 months.</li><li><strong>ANAQSUP_SESSION</strong> (management area staff): keeps you logged in; deleted when the browser is closed, expires after 3 hours of inactivity.</li><li><strong>XSRF-TOKEN</strong> (management area staff): protects actions against fraudulent requests; lasts for the session.</li></ul>
-<p>These cookies are necessary for the service you are using; none of them is used to track you or for advertising. <strong>[To be confirmed: no consent request for these cookies.]</strong></p>$en$,
+<ul><li><strong>anaqsup_lecteur</strong> (readers): set only when you vote "Like" or "Dislike", to count one vote per browser; 12 months.</li></ul>
+<p>This cookie is necessary for the service you are using; it is not used to track you or for advertising. <strong>[To be confirmed: no consent request for this cookie.]</strong></p>$en$,
 'PUBLIE', 'migration', now())
 ON CONFLICT (slug) DO NOTHING;
 

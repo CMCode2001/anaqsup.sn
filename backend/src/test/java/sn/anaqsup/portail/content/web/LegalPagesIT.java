@@ -51,9 +51,13 @@ class LegalPagesIT {
                         {"title": "Legal notice", "lang": "en"}""");
         assertThat(mvc.get().uri("/api/v1/public/pages/donnees-personnelles")).hasStatusOk()
                 .bodyJson().extractingPath("$.bodyHtml").asString()
-                .contains("anaqsup_lecteur", "ANAQSUP_SESSION", "[À compléter");
-        assertThat(mvc.get().uri("/api/v1/public/pages/donnees-personnelles?lang=en")).hasStatusOk()
-                .bodyJson().extractingPath("$.title").isEqualTo("Personal data and cookies");
+                .contains("anaqsup_lecteur", "[À compléter")
+                // Pages publiques : rien sur l'outil interne de l'ANAQ-Sup (décision du 14/10/2026).
+                .doesNotContain("espace de gestion", "ANAQSUP_SESSION", "XSRF", "mot de passe");
+        var english = mvc.get().uri("/api/v1/public/pages/donnees-personnelles?lang=en").exchange();
+        assertThat(english).bodyJson().extractingPath("$.title").isEqualTo("Personal data and cookies");
+        assertThat(english).bodyJson().extractingPath("$.bodyHtml").asString()
+                .doesNotContain("management area", "ANAQSUP_SESSION", "XSRF", "password");
     }
 
     @Test
