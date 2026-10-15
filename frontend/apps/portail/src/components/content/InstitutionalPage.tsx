@@ -65,7 +65,7 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
           </figure>
         )}
         {governance ? (
-          // Gouvernance : une carte par organe (intertitres du texte), sur toute la largeur.
+          // Gouvernance : organigramme des organes (intertitres du texte), sur toute la largeur.
           <div>
             <FrenchOnlyNotice lang={page.lang} className="mb-8" />
             {governance.intro && <RichText html={governance.intro} lang={contentLang} className="mb-10 max-w-4xl" />}
