@@ -497,8 +497,8 @@ export interface paths {
         get: operations["listAdminEstablishments"];
         put?: never;
         /**
-         * Ajouter un établissement
-         * @description Avis et année vont ensemble (AVIS_INCOMPLETE) ; site web en http(s) (INVALID_URL).
+         * Ajouter un établissement ou une composante
+         * @description L'avis n'est plus saisi directement : il reflète la décision validée la plus récente (rubrique décisions). Pour la saisie rapide d'une fiche, un avis et une année (AVIS_INCOMPLETE sinon) créent une décision validée ; retirer un avis (AVIS_REMOVAL_VIA_DECISIONS) ou l'antidater avant la dernière décision (NEWER_DECISION_EXISTS) est refusé. Site web en http(s) (INVALID_URL) ; composante : même type que son établissement (PARENT_KIND_MISMATCH), pas de cycle (PARENT_CYCLE).
          */
         post: operations["createEstablishment"];
         delete?: never;
@@ -521,7 +521,10 @@ export interface paths {
         /** Modifier un établissement (son adresse ne change pas) */
         put: operations["updateEstablishment"];
         post?: never;
-        /** Supprimer un établissement sans formation (sinon ESTABLISHMENT_HAS_PROGRAMS) */
+        /**
+         * Supprimer un établissement sans formation, sans composante ni décision
+         * @description ESTABLISHMENT_HAS_PROGRAMS, ESTABLISHMENT_HAS_COMPONENTS ou ESTABLISHMENT_HAS_DECISIONS sinon.
+         */
         delete: operations["deleteEstablishment"];
         options?: never;
         head?: never;
@@ -563,7 +566,7 @@ export interface paths {
         /** Modifier une formation (son adresse ne change pas) */
         put: operations["updateProgram"];
         post?: never;
-        /** Supprimer une formation */
+        /** Supprimer une formation qui n'apparaît dans aucune décision (sinon PROGRAM_HAS_DECISIONS) */
         delete: operations["deleteProgram"];
         options?: never;
         head?: never;
@@ -586,6 +589,114 @@ export interface paths {
          */
         put: operations["updateSettings"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/registry/establishments/{id}/parent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Détacher une composante de son établissement */
+        delete: operations["detachEstablishment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/registry/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Décisions du Conseil scientifique, tous statuts */
+        get: operations["listDecisions"];
+        put?: never;
+        /**
+         * Créer une décision (en brouillon, invisible du public)
+         * @description Tous les contrôles sont faits avant l'écriture ; en cas d'échec, la réponse 422 liste chaque anomalie et rien n'est enregistré. Règles : date du Conseil scientifique pas dans le futur ni avant 2014, pas antérieure à la signature du rapport ; établissement, formations, décision précédente et rapports existants ; formations de l'établissement ou de ses composantes, sans doublon ; une accréditation porte sur au moins une formation ; l'avis est d'ensemble OU formation par formation, jamais les deux. Un rapport est identifié par son adresse : s'il existe, il est réutilisé. Les avertissements (lien hors anaqsup.sn, titre éloigné de la formation) ne bloquent pas.
+         */
+        post: operations["createDecision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/registry/decisions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        /** Décision avec ses avis par formation et son rapport */
+        get: operations["getDecision"];
+        /**
+         * Remplacer une décision en brouillon
+         * @description Une décision validée ne se modifie pas (409 DECISION_NOT_EDITABLE) : on l'archive puis on en crée une nouvelle.
+         */
+        put: operations["updateDecision"];
+        post?: never;
+        /** Supprimer un brouillon */
+        delete: operations["deleteDecision"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/registry/decisions/{id}/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rendre une décision publique
+         * @description Publication directe (décision de l'ANAQ-Sup) : la personne qui a la permission AVIS valide. L'avis et l'année apparaissent sur les fiches ; le portail est prévenu.
+         */
+        post: operations["validateDecision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/registry/decisions/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retirer une décision validée du public en gardant son historique
+         * @description Le statut courant de l'établissement et des formations est recalculé sans elle.
+         */
+        post: operations["archiveDecision"];
         delete?: never;
         options?: never;
         head?: never;
@@ -921,6 +1032,157 @@ export interface components {
         };
         /** @enum {string} */
         Avis: "FAVORABLE" | "DEFAVORABLE";
+        /** @enum {string} */
+        DecisionStatus: "BROUILLON" | "VALIDE" | "ARCHIVE";
+        /** @enum {string} */
+        DecisionKind: "HABILITATION" | "HABILITATION_COMPLEMENTAIRE" | "ACCREDITATION" | "RENOUVELLEMENT_ACCREDITATION";
+        /**
+         * @description CONDITIONNEL = accréditation conditionnelle (affichée FAVORABLE sur les fiches).
+         * @enum {string}
+         */
+        DecisionAvis: "FAVORABLE" | "DEFAVORABLE" | "CONDITIONNEL";
+        DecisionReportRequest: {
+            /** @description Titre lu sur la page de garde du PDF */
+            title: string;
+            /** Format: uri */
+            url: string;
+            /**
+             * @default RAPPORT_EVALUATION_EXTERNE
+             * @enum {string}
+             */
+            kind: "RAPPORT_EVALUATION_EXTERNE" | "DECISION_CONSEIL_SCIENTIFIQUE" | "AUTRE";
+            /** Format: date */
+            signedOn?: string | null;
+            /** Format: date */
+            visitedOn?: string | null;
+            /**
+             * @description Un rapport privé n'est jamais exposé au public
+             * @default PUBLIC
+             * @enum {string}
+             */
+            visibility: "PUBLIC" | "PRIVE";
+        };
+        DecisionProgramRequest: {
+            /** Format: uuid */
+            programId: string;
+            avis: components["schemas"]["DecisionAvis"];
+            /**
+             * Format: uuid
+             * @description Rapport propre à la formation, sinon celui de la décision
+             */
+            reportId?: string | null;
+            remark?: string | null;
+        };
+        DecisionRequest: {
+            kind: components["schemas"]["DecisionKind"];
+            /** Format: uuid */
+            establishmentId: string;
+            /**
+             * Format: date
+             * @description Date du Conseil scientifique
+             */
+            decidedOn?: string | null;
+            /** @description Obligatoire sans decidedOn (l'ancien site ne donne que l'année) ; déduite de la date sinon */
+            year?: number | null;
+            /** @description 5 ans pour une accréditation, 10 pour une habilitation, ou la durée du rapport */
+            validityYears: number;
+            wave?: number | null;
+            /** @description Avis d'ensemble. À omettre quand chaque formation a son avis. */
+            avis?: components["schemas"]["DecisionAvis"] | null;
+            report?: components["schemas"]["DecisionReportRequest"] | null;
+            /**
+             * Format: uuid
+             * @description Décision remplacée (renouvellement, seconde soumission)
+             */
+            previousId?: string | null;
+            comment?: string | null;
+            programs?: components["schemas"]["DecisionProgramRequest"][];
+        };
+        DecisionReport: {
+            /** Format: uuid */
+            id: string;
+            kind: string;
+            title: string;
+            url: string;
+            /** Format: date */
+            signedOn?: string | null;
+            /** Format: date */
+            visitedOn?: string | null;
+            /** @enum {string} */
+            visibility: "PUBLIC" | "PRIVE";
+            linkOk?: boolean | null;
+        };
+        DecisionProgram: {
+            /** Format: uuid */
+            programId: string;
+            programSlug: string;
+            title: string;
+            avis: components["schemas"]["DecisionAvis"];
+            /** Format: uuid */
+            reportId?: string | null;
+            remark?: string | null;
+        };
+        Decision: {
+            /** Format: uuid */
+            id: string;
+            kind: components["schemas"]["DecisionKind"];
+            /** Format: uuid */
+            establishmentId: string;
+            establishmentSlug: string;
+            establishmentName: string;
+            /** Format: date */
+            decidedOn?: string | null;
+            year: number;
+            validityYears: number;
+            /**
+             * Format: date
+             * @description Date du Conseil scientifique + durée - 1 jour
+             */
+            validUntil: string;
+            validUntilEstimated: boolean;
+            wave?: number | null;
+            /** @description Avis d'ensemble saisi */
+            avis?: string | null;
+            /** @description Avis d'ensemble, ou MIXTE quand les formations diffèrent */
+            effectiveAvis?: string | null;
+            status: components["schemas"]["DecisionStatus"];
+            comment?: string | null;
+            /** Format: uuid */
+            previousId?: string | null;
+            report?: components["schemas"]["DecisionReport"] | null;
+            programs: components["schemas"]["DecisionProgram"][];
+            enteredBy: string;
+            validatedBy?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** @description Avertissements qui ne bloquent pas (à la création et à la correction) */
+            warnings: string[];
+        };
+        DecisionItem: {
+            /** Format: uuid */
+            id: string;
+            kind: components["schemas"]["DecisionKind"];
+            /** Format: uuid */
+            establishmentId: string;
+            establishmentSlug: string;
+            establishmentName: string;
+            year: number;
+            /** Format: date */
+            decidedOn?: string | null;
+            /** Format: date */
+            validUntil: string;
+            effectiveAvis?: string | null;
+            status: components["schemas"]["DecisionStatus"];
+            enteredBy: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DecisionPage: {
+            content: components["schemas"]["DecisionItem"][];
+            page: components["schemas"]["PageInfo"];
+        };
         Establishment: {
             /** Format: uuid */
             id: string;
@@ -936,9 +1198,17 @@ export interface components {
             avisYear?: number | null;
             /**
              * Format: int64
-             * @description Nombre de formations
+             * @description Nombre de formations (hors composantes)
              */
             programs: number;
+            /** @enum {string} */
+            nature?: "UNIVERSITE" | "INSTITUT" | "ECOLE" | "CENTRE" | "UFR_FACULTE" | "ECOLE_DOCTORALE" | "AUTRE";
+            /**
+             * Format: uuid
+             * @description Établissement dont c'est une composante
+             */
+            parentId?: string | null;
+            provisional?: boolean;
         };
         EstablishmentPage: {
             content: components["schemas"]["Establishment"][];
@@ -954,6 +1224,13 @@ export interface components {
             website?: string | null;
             avis?: components["schemas"]["Avis"] | null;
             avisYear?: number | null;
+            /** @enum {string} */
+            nature?: "UNIVERSITE" | "INSTITUT" | "ECOLE" | "CENTRE" | "UFR_FACULTE" | "ECOLE_DOCTORALE" | "AUTRE";
+            /**
+             * Format: uuid
+             * @description Composante de cet établissement (même type public ou privé). Absent : inchangé ; DELETE .../parent pour détacher
+             */
+            parentId?: string | null;
         };
         /** @enum {string} */
         ProgramLevel: "LICENCE" | "MASTER" | "DOCTORAT" | "DUT" | "BTS" | "AUTRE";
@@ -968,6 +1245,8 @@ export interface components {
             establishmentId: string;
             establishmentName: string;
             establishmentAcronym?: string | null;
+            optionParcours?: string | null;
+            provisional?: boolean;
             avis?: components["schemas"]["Avis"] | null;
             avisYear?: number | null;
         };
@@ -981,6 +1260,7 @@ export interface components {
             domain?: string | null;
             /** Format: uuid */
             establishmentId: string;
+            optionParcours?: string | null;
             avis?: components["schemas"]["Avis"] | null;
             avisYear?: number | null;
         };
@@ -1057,6 +1337,15 @@ export interface components {
         };
         /** @description Compte ou rôle introuvable */
         NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description VALIDATION_REFUSEE : la réponse liste chaque anomalie dans `anomalies` (field, rule, detail) et rien n'est enregistré. */
+        Unprocessable: {
             headers: {
                 [name: string]: unknown;
             };
@@ -2438,6 +2727,204 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             403: components["responses"]["Forbidden"];
+        };
+    };
+    detachEstablishment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Établissement sans parent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Establishment"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listDecisions: {
+        parameters: {
+            query?: {
+                establishment?: string;
+                status?: components["schemas"]["DecisionStatus"];
+                kind?: components["schemas"]["DecisionKind"];
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page de décisions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionPage"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    createDecision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Décision créée en brouillon */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Decision"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            422: components["responses"]["Unprocessable"];
+        };
+    };
+    getDecision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Décision */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Decision"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateDecision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Décision mise à jour */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Decision"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["Unprocessable"];
+        };
+    };
+    deleteDecision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Brouillon supprimé */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    validateDecision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Décision validée */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Decision"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    archiveDecision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Décision archivée */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Decision"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
 }

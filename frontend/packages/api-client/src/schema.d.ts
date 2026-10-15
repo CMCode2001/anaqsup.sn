@@ -212,6 +212,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/establishments/{slug}/programs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Toutes les formations d'un établissement, celles de ses composantes comprises
+         * @description Pour la page qui s'ouvre quand on clique sur un établissement. Les formations des composantes (UFR, facultés, écoles doctorales) sont incluses ; chaque formation indique l'établissement ou la composante qui la porte.
+         */
+        get: operations["listEstablishmentPrograms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/establishments/{slug}/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historique des habilitations validées d'un établissement
+         * @description La plus récente en premier. Seules les décisions validées sont publiques ; un rapport privé n'est jamais exposé.
+         */
+        get: operations["listEstablishmentDecisions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/programs": {
         parameters: {
             query?: never;
@@ -470,12 +510,72 @@ export interface components {
             city?: string | null;
             habilitationAvis?: components["schemas"]["Avis"] | null;
             habilitationAvisYear?: number | null;
+            nature?: components["schemas"]["EstablishmentNature"];
+            /** @description Une décision plus récente est en cours de vérification : l'avis est provisoire */
+            provisional?: boolean;
+            /** @description Établissement dont c'est une composante */
+            parent?: components["schemas"]["EstablishmentRef"] | null;
         };
         Establishment: components["schemas"]["EstablishmentSummary"] & {
             region?: string | null;
             /** Format: uri */
             website?: string | null;
+            /** @description Formations de l'établissement et de ses composantes */
             programCount: number;
+            components?: components["schemas"]["EstablishmentComponent"][];
+            currentHabilitation?: components["schemas"]["DecisionEntry"] | null;
+        };
+        /** @enum {string} */
+        EstablishmentNature: "UNIVERSITE" | "INSTITUT" | "ECOLE" | "CENTRE" | "UFR_FACULTE" | "ECOLE_DOCTORALE" | "AUTRE";
+        EstablishmentRef: {
+            slug: components["schemas"]["Slug"];
+            name: string;
+        };
+        /** @description Composante directe d'un établissement (UFR, faculté, école doctorale). */
+        EstablishmentComponent: {
+            slug: components["schemas"]["Slug"];
+            name: string;
+            acronym?: string | null;
+            nature: components["schemas"]["EstablishmentNature"];
+            /** @description Formations de la composante et de ses propres composantes */
+            programCount: number;
+        };
+        /** @enum {string} */
+        DecisionKind: "HABILITATION" | "HABILITATION_COMPLEMENTAIRE" | "ACCREDITATION" | "RENOUVELLEMENT_ACCREDITATION";
+        /** @description Rapport d'évaluation public. Un rapport privé n'apparaît jamais. */
+        DecisionReport: {
+            title: string;
+            /** Format: uri */
+            url: string;
+            /** Format: date */
+            signedOn?: string | null;
+            /** @description `false` : le dernier contrôle du lien a échoué */
+            linkOk?: boolean | null;
+        };
+        /** @description Une décision de l'historique d'un établissement ou d'une formation. `avis` est celui de la formation, ou l'avis d'ensemble de l'établissement (MIXTE quand ses formations n'ont pas toutes le même). CONDITIONNEL : accréditation conditionnelle, affichée FAVORABLE sur la fiche. */
+        DecisionEntry: {
+            /** Format: uuid */
+            id: string;
+            kind: components["schemas"]["DecisionKind"];
+            year: number;
+            /**
+             * Format: date
+             * @description Date du Conseil scientifique, si connue
+             */
+            decidedOn?: string | null;
+            validityYears: number;
+            /**
+             * Format: date
+             * @description Date du Conseil scientifique + durée - 1 jour
+             */
+            validUntil: string;
+            /** @description La date exacte n'est pas connue : fin estimée à partir de l'année */
+            validUntilEstimated: boolean;
+            inForce: boolean;
+            /** @enum {string|null} */
+            avis?: "FAVORABLE" | "DEFAVORABLE" | "CONDITIONNEL" | "MIXTE" | null;
+            wave?: number | null;
+            report?: components["schemas"]["DecisionReport"] | null;
         };
         EstablishmentPage: {
             content: components["schemas"]["EstablishmentSummary"][];
@@ -492,8 +592,14 @@ export interface components {
             };
             accreditationAvis?: components["schemas"]["Avis"] | null;
             accreditationAvisYear?: number | null;
+            /** @description Ex. « option Assurance » : deux options sont deux formations */
+            optionParcours?: string | null;
+            /** @description Une décision plus récente est en cours de vérification : l'avis est provisoire */
+            provisional?: boolean;
         };
-        Program: components["schemas"]["ProgramSummary"];
+        Program: components["schemas"]["ProgramSummary"] & {
+            decisions: components["schemas"]["DecisionEntry"][];
+        };
         ProgramPage: {
             content: components["schemas"]["ProgramSummary"][];
             page: components["schemas"]["PageMeta"];
@@ -953,6 +1059,64 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Establishment"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listEstablishmentPrograms: {
+        parameters: {
+            query?: {
+                /** @description Nom, sigle, ville ou domaine (insensible aux accents et tolérant aux fautes) */
+                q?: components["parameters"]["Query"];
+                level?: components["schemas"]["ProgramLevel"];
+                avis?: components["schemas"]["Avis"];
+                page?: components["parameters"]["Page"];
+                size?: number;
+            };
+            header?: never;
+            path: {
+                slug: components["parameters"]["Slug"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page de formations */
+            200: {
+                headers: {
+                    ETag: components["headers"]["ETag"];
+                    "Cache-Control": components["headers"]["CacheControl"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProgramPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listEstablishmentDecisions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: components["parameters"]["Slug"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Décisions */
+            200: {
+                headers: {
+                    ETag: components["headers"]["ETag"];
+                    "Cache-Control": components["headers"]["CacheControl"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionEntry"][];
                 };
             };
             404: components["responses"]["NotFound"];

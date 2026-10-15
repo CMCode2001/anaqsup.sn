@@ -750,8 +750,12 @@ paths:
     post:
       tags: [Habilitations et accréditations]
       operationId: createEstablishment
-      summary: Ajouter un établissement
-      description: Avis et année vont ensemble (AVIS_INCOMPLETE) ; site web en http(s) (INVALID_URL).
+      summary: Ajouter un établissement ou une composante
+      description: >-
+        L'avis n'est plus saisi directement : il reflète la décision validée la plus récente (rubrique décisions).
+        Pour la saisie rapide d'une fiche, un avis et une année (AVIS_INCOMPLETE sinon) créent une décision validée ;
+        retirer un avis (AVIS_REMOVAL_VIA_DECISIONS) ou l'antidater avant la dernière décision (NEWER_DECISION_EXISTS) est refusé.
+        Site web en http(s) (INVALID_URL) ; composante : même type que son établissement (PARENT_KIND_MISMATCH), pas de cycle (PARENT_CYCLE).
       requestBody:
         required: true
         content:
@@ -798,7 +802,8 @@ paths:
     delete:
       tags: [Habilitations et accréditations]
       operationId: deleteEstablishment
-      summary: Supprimer un établissement sans formation (sinon ESTABLISHMENT_HAS_PROGRAMS)
+      summary: Supprimer un établissement sans formation, sans composante ni décision
+      description: ESTABLISHMENT_HAS_PROGRAMS, ESTABLISHMENT_HAS_COMPONENTS ou ESTABLISHMENT_HAS_DECISIONS sinon.
       responses:
         '204': { description: Établissement supprimé }
         '400': { $ref: '#/components/responses/BadRequest' }
@@ -873,7 +878,7 @@ paths:
     delete:
       tags: [Habilitations et accréditations]
       operationId: deleteProgram
-      summary: Supprimer une formation
+      summary: Supprimer une formation qui n'apparaît dans aucune décision (sinon PROGRAM_HAS_DECISIONS)
       responses:
         '204': { description: Formation supprimée }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -911,6 +916,139 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  /admin/registry/establishments/{id}/parent:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    delete:
+      tags: [Habilitations et accréditations]
+      operationId: detachEstablishment
+      summary: Détacher une composante de son établissement
+      responses:
+        '200':
+          description: Établissement sans parent
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Establishment' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/registry/decisions:
+    get:
+      tags: [Habilitations et accréditations]
+      operationId: listDecisions
+      summary: Décisions du Conseil scientifique, tous statuts
+      parameters:
+        - { name: establishment, in: query, schema: { type: string, format: uuid } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/DecisionStatus' } }
+        - { name: kind, in: query, schema: { $ref: '#/components/schemas/DecisionKind' } }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 20 } }
+      responses:
+        '200':
+          description: Page de décisions
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DecisionPage' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Habilitations et accréditations]
+      operationId: createDecision
+      summary: Créer une décision (en brouillon, invisible du public)
+      description: >-
+        Tous les contrôles sont faits avant l'écriture ; en cas d'échec, la réponse 422 liste chaque anomalie et rien n'est
+        enregistré. Règles : date du Conseil scientifique pas dans le futur ni avant 2014, pas antérieure à la signature du
+        rapport ; établissement, formations, décision précédente et rapports existants ; formations de l'établissement ou
+        de ses composantes, sans doublon ; une accréditation porte sur au moins une formation ; l'avis est d'ensemble OU
+        formation par formation, jamais les deux. Un rapport est identifié par son adresse : s'il existe, il est réutilisé.
+        Les avertissements (lien hors anaqsup.sn, titre éloigné de la formation) ne bloquent pas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DecisionRequest' }
+      responses:
+        '201':
+          description: Décision créée en brouillon
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Decision' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /admin/registry/decisions/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Habilitations et accréditations]
+      operationId: getDecision
+      summary: Décision avec ses avis par formation et son rapport
+      responses:
+        '200':
+          description: Décision
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Decision' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Habilitations et accréditations]
+      operationId: updateDecision
+      summary: Remplacer une décision en brouillon
+      description: >-
+        Une décision validée ne se modifie pas (409 DECISION_NOT_EDITABLE) : on l'archive puis on en crée une nouvelle.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DecisionRequest' }
+      responses:
+        '200':
+          description: Décision mise à jour
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Decision' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+    delete:
+      tags: [Habilitations et accréditations]
+      operationId: deleteDecision
+      summary: Supprimer un brouillon
+      responses:
+        '204': { description: Brouillon supprimé }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /admin/registry/decisions/{id}/validate:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Habilitations et accréditations]
+      operationId: validateDecision
+      summary: Rendre une décision publique
+      description: >-
+        Publication directe (décision de l'ANAQ-Sup) : la personne qui a la permission AVIS valide. L'avis et l'année
+        apparaissent sur les fiches ; le portail est prévenu.
+      responses:
+        '200':
+          description: Décision validée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Decision' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /admin/registry/decisions/{id}/archive:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Habilitations et accréditations]
+      operationId: archiveDecision
+      summary: Retirer une décision validée du public en gardant son historique
+      description: Le statut courant de l'établissement et des formations est recalculé sans elle.
+      responses:
+        '200':
+          description: Décision archivée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Decision' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
 components:
   securitySchemes:
     session:
@@ -943,6 +1081,12 @@ components:
           schema: { $ref: '#/components/schemas/Problem' }
     NotFound:
       description: Compte ou rôle introuvable
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unprocessable:
+      description: >-
+        VALIDATION_REFUSEE : la réponse liste chaque anomalie dans `anomalies` (field, rule, detail) et rien n'est enregistré.
       content:
         application/problem+json:
           schema: { $ref: '#/components/schemas/Problem' }
@@ -1305,6 +1449,143 @@ components:
       type: string
       enum: [FAVORABLE, DEFAVORABLE]
 
+    DecisionStatus:
+      type: string
+      enum: [BROUILLON, VALIDE, ARCHIVE]
+
+    DecisionKind:
+      type: string
+      enum: [HABILITATION, HABILITATION_COMPLEMENTAIRE, ACCREDITATION, RENOUVELLEMENT_ACCREDITATION]
+
+    DecisionAvis:
+      type: string
+      description: CONDITIONNEL = accréditation conditionnelle (affichée FAVORABLE sur les fiches).
+      enum: [FAVORABLE, DEFAVORABLE, CONDITIONNEL]
+
+    DecisionReportRequest:
+      type: object
+      required: [title, url]
+      properties:
+        title: { type: string, maxLength: 500, description: Titre lu sur la page de garde du PDF }
+        url: { type: string, maxLength: 2000, format: uri }
+        kind: { type: string, enum: [RAPPORT_EVALUATION_EXTERNE, DECISION_CONSEIL_SCIENTIFIQUE, AUTRE], default: RAPPORT_EVALUATION_EXTERNE }
+        signedOn: { type: [string, 'null'], format: date }
+        visitedOn: { type: [string, 'null'], format: date }
+        visibility: { type: string, enum: [PUBLIC, PRIVE], default: PUBLIC, description: Un rapport privé n'est jamais exposé au public }
+
+    DecisionProgramRequest:
+      type: object
+      required: [programId, avis]
+      properties:
+        programId: { type: string, format: uuid }
+        avis: { $ref: '#/components/schemas/DecisionAvis' }
+        reportId: { type: [string, 'null'], format: uuid, description: "Rapport propre à la formation, sinon celui de la décision" }
+        remark: { type: [string, 'null'], maxLength: 2000 }
+
+    DecisionRequest:
+      type: object
+      required: [kind, establishmentId, validityYears]
+      properties:
+        kind: { $ref: '#/components/schemas/DecisionKind' }
+        establishmentId: { type: string, format: uuid }
+        decidedOn: { type: [string, 'null'], format: date, description: Date du Conseil scientifique }
+        year: { type: [integer, 'null'], minimum: 2014, maximum: 2100, description: Obligatoire sans decidedOn (l'ancien site ne donne que l'année) ; déduite de la date sinon }
+        validityYears: { type: integer, minimum: 1, maximum: 20, description: "5 ans pour une accréditation, 10 pour une habilitation, ou la durée du rapport" }
+        wave: { type: [integer, 'null'], minimum: 1 }
+        avis:
+          description: Avis d'ensemble. À omettre quand chaque formation a son avis.
+          oneOf:
+            - { $ref: '#/components/schemas/DecisionAvis' }
+            - { type: 'null' }
+        report:
+          oneOf:
+            - { $ref: '#/components/schemas/DecisionReportRequest' }
+            - { type: 'null' }
+        previousId: { type: [string, 'null'], format: uuid, description: "Décision remplacée (renouvellement, seconde soumission)" }
+        comment: { type: [string, 'null'], maxLength: 5000 }
+        programs:
+          type: array
+          items: { $ref: '#/components/schemas/DecisionProgramRequest' }
+
+    DecisionReport:
+      type: object
+      required: [id, kind, title, url, visibility]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string }
+        title: { type: string }
+        url: { type: string }
+        signedOn: { type: [string, 'null'], format: date }
+        visitedOn: { type: [string, 'null'], format: date }
+        visibility: { type: string, enum: [PUBLIC, PRIVE] }
+        linkOk: { type: [boolean, 'null'] }
+
+    DecisionProgram:
+      type: object
+      required: [programId, programSlug, title, avis]
+      properties:
+        programId: { type: string, format: uuid }
+        programSlug: { type: string }
+        title: { type: string }
+        avis: { $ref: '#/components/schemas/DecisionAvis' }
+        reportId: { type: [string, 'null'], format: uuid }
+        remark: { type: [string, 'null'] }
+
+    Decision:
+      type: object
+      required: [id, kind, establishmentId, establishmentSlug, establishmentName, year, validityYears, validUntil, validUntilEstimated, status, programs, enteredBy, createdAt, updatedAt, warnings]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { $ref: '#/components/schemas/DecisionKind' }
+        establishmentId: { type: string, format: uuid }
+        establishmentSlug: { type: string }
+        establishmentName: { type: string }
+        decidedOn: { type: [string, 'null'], format: date }
+        year: { type: integer }
+        validityYears: { type: integer }
+        validUntil: { type: string, format: date, description: Date du Conseil scientifique + durée - 1 jour }
+        validUntilEstimated: { type: boolean }
+        wave: { type: [integer, 'null'] }
+        avis: { type: [string, 'null'], description: Avis d'ensemble saisi }
+        effectiveAvis: { type: [string, 'null'], description: 'Avis d''ensemble, ou MIXTE quand les formations diffèrent' }
+        status: { $ref: '#/components/schemas/DecisionStatus' }
+        comment: { type: [string, 'null'] }
+        previousId: { type: [string, 'null'], format: uuid }
+        report: { oneOf: [{ $ref: '#/components/schemas/DecisionReport' }, { type: 'null' }] }
+        programs: { type: array, items: { $ref: '#/components/schemas/DecisionProgram' } }
+        enteredBy: { type: string }
+        validatedBy: { type: [string, 'null'] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        warnings:
+          type: array
+          description: Avertissements qui ne bloquent pas (à la création et à la correction)
+          items: { type: string }
+
+    DecisionItem:
+      type: object
+      required: [id, kind, establishmentId, establishmentSlug, establishmentName, year, validUntil, status, enteredBy, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { $ref: '#/components/schemas/DecisionKind' }
+        establishmentId: { type: string, format: uuid }
+        establishmentSlug: { type: string }
+        establishmentName: { type: string }
+        year: { type: integer }
+        decidedOn: { type: [string, 'null'], format: date }
+        validUntil: { type: string, format: date }
+        effectiveAvis: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/DecisionStatus' }
+        enteredBy: { type: string }
+        updatedAt: { type: string, format: date-time }
+
+    DecisionPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/DecisionItem' } }
+        page: { $ref: '#/components/schemas/PageInfo' }
+
     Establishment:
       type: object
       required: [id, slug, name, kind, programs]
@@ -1322,7 +1603,10 @@ components:
             - { $ref: '#/components/schemas/Avis' }
             - { type: 'null' }
         avisYear: { type: [integer, 'null'] }
-        programs: { type: integer, format: int64, description: Nombre de formations }
+        programs: { type: integer, format: int64, description: Nombre de formations (hors composantes) }
+        nature: { type: string, enum: [UNIVERSITE, INSTITUT, ECOLE, CENTRE, UFR_FACULTE, ECOLE_DOCTORALE, AUTRE] }
+        parentId: { type: [string, 'null'], format: uuid, description: Établissement dont c'est une composante }
+        provisional: { type: boolean }
 
     EstablishmentPage:
       type: object
@@ -1346,6 +1630,8 @@ components:
             - { $ref: '#/components/schemas/Avis' }
             - { type: 'null' }
         avisYear: { type: [integer, 'null'], minimum: 2000, maximum: 2100 }
+        nature: { type: string, enum: [UNIVERSITE, INSTITUT, ECOLE, CENTRE, UFR_FACULTE, ECOLE_DOCTORALE, AUTRE] }
+        parentId: { type: [string, 'null'], format: uuid, description: 'Composante de cet établissement (même type public ou privé). Absent : inchangé ; DELETE .../parent pour détacher' }
 
     ProgramLevel:
       type: string
@@ -1363,6 +1649,8 @@ components:
         establishmentId: { type: string, format: uuid }
         establishmentName: { type: string }
         establishmentAcronym: { type: [string, 'null'] }
+        optionParcours: { type: [string, 'null'] }
+        provisional: { type: boolean }
         avis:
           oneOf:
             - { $ref: '#/components/schemas/Avis' }
@@ -1384,6 +1672,7 @@ components:
         level: { $ref: '#/components/schemas/ProgramLevel' }
         domain: { type: [string, 'null'], maxLength: 200 }
         establishmentId: { type: string, format: uuid }
+        optionParcours: { type: [string, 'null'], maxLength: 200 }
         avis:
           oneOf:
             - { $ref: '#/components/schemas/Avis' }
