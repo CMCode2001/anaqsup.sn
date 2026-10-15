@@ -96,7 +96,7 @@ export function NewsReactions({ slug, variant, labels }: { slug: string; variant
   const ready = state.likes !== null;
   const likeName = ready ? labels.likeCount.replace("{count}", String(state.likes)) : labels.like;
   const base = cn(
-    "inline-flex h-11 items-center justify-center gap-2 rounded-[0.625rem] border text-sm font-semibold shadow-sm transition-colors",
+    "inline-flex items-center justify-center rounded-control border text-sm font-semibold shadow-sm transition-colors",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-50",
   );
   const liked = state.mine === "LIKE";
@@ -107,34 +107,34 @@ export function NewsReactions({ slug, variant, labels }: { slug: string; variant
 
   if (variant === "toolbar") {
     return (
-      <div role="group" aria-label={labels.group} className="flex items-center gap-2 print:hidden">
-        <button type="button" className={cn(likeClass, "min-w-11 px-3")} disabled={!ready} aria-pressed={liked}
+      <div role="group" aria-label={labels.group} className="flex items-center gap-1.5 sm:gap-2 print:hidden">
+        <button type="button" className={cn(likeClass, "h-9 min-w-9 gap-1.5 px-2.5 sm:h-11 sm:min-w-11 sm:gap-2 sm:px-3")} disabled={!ready} aria-pressed={liked}
                 aria-label={likeName} title={labels.like} onClick={() => void vote(slug, "LIKE")}>
-          <ThumbsUpIcon className={cn("size-5", liked && "fill-current")} aria-hidden="true" />
+          <ThumbsUpIcon className={cn("size-4 sm:size-5", liked && "fill-current")} aria-hidden="true" />
           {ready && <span aria-hidden="true" className="tabular-nums">{state.likes}</span>}
         </button>
-        <button type="button" className={cn(dislikeClass, "w-11")} disabled={!ready} aria-pressed={disliked}
+        <button type="button" className={cn(dislikeClass, "size-9 sm:size-11")} disabled={!ready} aria-pressed={disliked}
                 aria-label={labels.dislike} title={labels.dislike} onClick={() => void vote(slug, "DISLIKE")}>
-          <ThumbsDownIcon className={cn("size-5", disliked && "fill-current")} aria-hidden="true" />
+          <ThumbsDownIcon className={cn("size-4 sm:size-5", disliked && "fill-current")} aria-hidden="true" />
         </button>
       </div>
     );
   }
 
   return (
-    <section aria-label={labels.group} className="mt-12 flex flex-col gap-4 rounded-2xl border bg-muted/40 p-5 sm:flex-row sm:items-center sm:justify-between md:p-6 print:hidden">
+    <section aria-label={labels.group} className="mt-12 flex flex-col gap-4 rounded-box border bg-muted/40 p-5 sm:flex-row sm:items-center sm:justify-between md:p-6 print:hidden">
       <div>
         <p className="font-heading text-lg font-bold text-foreground">{labels.question}</p>
         <p role="status" className={cn("mt-1 min-h-5 text-sm", state.message === "error" ? "text-destructive" : "text-muted-foreground")}>{message}</p>
       </div>
       <div className="flex shrink-0 gap-3">
-        <button type="button" className={cn(likeClass, "flex-1 px-3 whitespace-nowrap sm:flex-none sm:px-4")} disabled={!ready} aria-pressed={liked}
+        <button type="button" className={cn(likeClass, "h-11 flex-1 gap-2 px-3 whitespace-nowrap sm:flex-none sm:px-4")} disabled={!ready} aria-pressed={liked}
                 aria-label={likeName} onClick={() => void vote(slug, "LIKE")}>
           <ThumbsUpIcon className={cn("size-5", liked && "fill-current")} aria-hidden="true" />
           <span aria-hidden="true">{labels.like}</span>
           {ready && <span aria-hidden="true" className={cn("rounded-full px-2 py-0.5 text-xs tabular-nums", liked ? "bg-white/30" : "bg-muted")}>{state.likes}</span>}
         </button>
-        <button type="button" className={cn(dislikeClass, "flex-1 px-3 whitespace-nowrap sm:flex-none sm:px-4")} disabled={!ready} aria-pressed={disliked}
+        <button type="button" className={cn(dislikeClass, "h-11 flex-1 gap-2 px-3 whitespace-nowrap sm:flex-none sm:px-4")} disabled={!ready} aria-pressed={disliked}
                 onClick={() => void vote(slug, "DISLIKE")}>
           <ThumbsDownIcon className={cn("size-5", disliked && "fill-current")} aria-hidden="true" />
           {labels.dislike}

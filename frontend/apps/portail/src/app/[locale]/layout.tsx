@@ -35,6 +35,10 @@ export async function generateMetadata({ params }: Omit<Props, "children">): Pro
     title: { default: t("title"), template: `%s · ${site.shortName}` },
     description: t("description"),
     openGraph: { type: "website", locale: locale === "en" ? "en_GB" : "fr_SN", siteName: site.shortName },
+    // iPhone : sans cela, WebKit transforme lui-même numéros, dates et adresses en liens (attributs
+    // x-apple-data-detectors) avant que React ne prenne la main, d'où une erreur d'hydratation. Les liens
+    // tel: et mailto: utiles sont déjà posés par le site.
+    formatDetection: { telephone: false, date: false, address: false, email: false },
   };
 }
 

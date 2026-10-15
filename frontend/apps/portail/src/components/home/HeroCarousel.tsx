@@ -5,9 +5,9 @@ import { Children, type ReactNode, useEffect, useRef, useState } from "react";
 
 const DELAY_MS = 6000;
 
-/** Boutons posés sur la photo : verre dépoli, lisibles sur toutes les images. */
+/** Boutons en verre dépoli, lisibles sur toutes les images (sur la photo à partir de la tablette). */
 const control =
-  "inline-flex size-10 items-center justify-center rounded-[0.625rem] bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm transition-colors hover:bg-white hover:text-anthracite focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
+  "inline-flex size-9 items-center justify-center rounded-full bg-white/15 md:size-10 text-white ring-1 ring-white/25 backdrop-blur-sm transition-colors hover:bg-white hover:text-anthracite focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
 
 /**
  * Carrousel « À la une » (décision ANAQ-Sup du 14/10/2026) : bandeau pleine largeur en haut de l'accueil ;
@@ -71,10 +71,11 @@ export function HeroCarousel({ children, labels }: {
       </div>
 
       {count > 1 && (
-        // Dans la photo, alignées sur le bord droit du site : en haut sur téléphone (le texte occupe le bas),
-        // en bas à la hauteur de « Lire la suite » sinon.
-        <div className="absolute inset-x-0 top-4 z-10 md:top-auto md:bottom-14">
-          <div className="mx-auto flex max-w-7xl items-center justify-end gap-3 px-4">
+        // Téléphone : barre sous le texte, sur le fond anthracite (sur la photo, elles en cachaient une partie) :
+        // points à gauche, boutons à droite. À partir de la tablette : sur la photo, alignées sur le bord droit du
+        // site, à la hauteur de « Lire la suite ».
+        <div className="bg-anthracite pb-6 md:absolute md:inset-x-0 md:bottom-14 md:z-10 md:bg-transparent md:pb-0">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 md:justify-end">
           <div className="flex items-center gap-1.5">
             {slides.map((_, i) => (
               <button

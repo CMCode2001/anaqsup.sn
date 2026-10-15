@@ -15,7 +15,7 @@ export function PersonCaption({ name, role, size = "lg" }: {
       {name && (
         <p className={cn("font-heading leading-tight font-extrabold text-brand-ink", size === "lg" ? "text-xl" : "text-lg")}>{name}</p>
       )}
-      {name && role && <span aria-hidden="true" className="mx-auto my-2 block h-0.5 w-10 rounded-full bg-primary" />}
+      {name && role && <span aria-hidden="true" className="mx-auto my-2 block h-0.5 w-10 rounded-[1px] bg-primary" />}
       {role && <p className="text-sm font-medium text-muted-foreground">{role}</p>}
     </figcaption>
   );

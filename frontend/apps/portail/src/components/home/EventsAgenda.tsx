@@ -8,7 +8,10 @@ import { langAttr } from "@/lib/lang";
 
 type EventSummary = EventPage["content"][number];
 
-/** Agenda de l'accueil (modèle validé) : pastille de date à gauche, intitulé et « Lire la suite » à droite. */
+/**
+ * Agenda de l'accueil (modèle validé) : pastille de date à gauche, intitulé et « Lire la suite » à droite.
+ * Téléphone : une seule carte, avec une petite pastille de date calée en haut (elle s'étirait sur toute la hauteur).
+ */
 export async function EventsAgenda({ events }: { events: EventSummary[] }) {
   const locale = await getLocale();
   const t = await getTranslations("Common");
@@ -21,17 +24,17 @@ export async function EventsAgenda({ events }: { events: EventSummary[] }) {
           <li key={event.slug}>
             <Link
               href={{ pathname: "/evenements/[slug]", params: { slug: event.slug } }}
-              className="group grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3 rounded-3xl transition-transform duration-300 hover:scale-[1.01] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-5"
+              className="group flex items-start gap-4 rounded-box bg-muted p-3 transition-transform duration-300 hover:scale-[1.01] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:grid sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-stretch sm:gap-5 sm:bg-transparent sm:p-0"
             >
               <time
                 dateTime={event.startsAt}
-                className="flex flex-col items-center justify-center rounded-2xl bg-primary px-2 py-4 text-primary-foreground shadow-sm"
+                className="flex w-[4.5rem] shrink-0 flex-col items-center justify-center rounded-control bg-primary px-1 py-2.5 text-primary-foreground shadow-sm sm:w-auto sm:px-2 sm:py-4"
               >
-                <span className="text-sm font-semibold sm:text-base">{date.weekday}</span>
-                <span className="text-3xl leading-none font-extrabold sm:text-4xl">{date.day}</span>
-                <span className="text-sm font-semibold sm:text-base">{date.month}</span>
+                <span className="text-xs font-semibold sm:text-base">{date.weekday}</span>
+                <span className="text-2xl leading-none font-extrabold sm:text-4xl">{date.day}</span>
+                <span className="text-xs font-semibold sm:text-base">{date.month}</span>
               </time>
-              <span className="flex flex-col justify-center gap-3 rounded-2xl border-t-[3px] border-anthracite bg-muted px-5 py-5 transition-shadow group-hover:shadow-lg sm:flex-row sm:items-center sm:justify-between sm:px-8">
+              <span className="flex min-w-0 flex-1 flex-col gap-2 py-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:rounded-box sm:border-t-[3px] sm:border-anthracite sm:bg-muted sm:px-8 sm:py-5 sm:transition-shadow sm:group-hover:shadow-lg">
                 <span>
                   <span lang={textLang} className="block font-bold leading-snug text-foreground">{event.title}</span>
                   {event.location && (

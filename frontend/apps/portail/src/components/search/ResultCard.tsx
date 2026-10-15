@@ -44,8 +44,8 @@ export async function ResultCard({ hit, link }: { hit: SearchHit; link: HitLink 
   const registry = hit.type === "establishments" || hit.type === "programs";
 
   return (
-    <article className="group relative flex gap-4 rounded-3xl border bg-card p-3 shadow-sm transition-shadow duration-300 hover:shadow-lg sm:gap-6 sm:p-4">
-      <div className="relative aspect-square w-20 shrink-0 self-start overflow-hidden rounded-2xl border bg-muted sm:aspect-[4/3] sm:w-52">
+    <article className="group relative flex gap-4 rounded-box border bg-card p-3 shadow-sm transition-shadow duration-300 hover:shadow-lg sm:gap-6 sm:p-4">
+      <div className="relative aspect-square w-20 shrink-0 self-start overflow-hidden rounded-box border bg-muted sm:aspect-[4/3] sm:w-52">
         {hit.imageUrl ? (
           <CoverImage
             src={hit.imageUrl}
@@ -55,7 +55,7 @@ export async function ResultCard({ hit, link }: { hit: SearchHit; link: HitLink 
           />
         ) : (
           <div aria-hidden="true" className="absolute inset-0 grid place-items-center bg-primary/10">
-            <span className="grid size-10 place-items-center rounded-full bg-background text-brand-ink shadow-sm sm:size-14">
+            <span className="grid size-10 place-items-center rounded-control bg-background text-brand-ink shadow-sm sm:size-14">
               <Icon className="size-5 sm:size-6" />
             </span>
           </div>
@@ -64,7 +64,7 @@ export async function ResultCard({ hit, link }: { hit: SearchHit; link: HitLink 
 
       <div className="flex min-w-0 flex-1 flex-col gap-2 py-0.5 sm:py-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-0.5 text-[0.6875rem] font-semibold tracking-wide text-brand-ink uppercase">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-brand-ink uppercase">
             <Icon className="size-3" aria-hidden="true" />
             {t(`Search.type.${hit.type}`)}
           </span>
@@ -84,7 +84,7 @@ export async function ResultCard({ hit, link }: { hit: SearchHit; link: HitLink 
             prefetch={false}
             target={link.newTab ? "_blank" : undefined}
             rel={link.newTab ? "noopener" : undefined}
-            className="rounded-sm after:absolute after:inset-0 after:rounded-3xl group-hover:underline group-hover:decoration-primary group-hover:decoration-2 group-hover:underline-offset-4 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
+            className="rounded-sm after:absolute after:inset-0 after:rounded-box group-hover:underline group-hover:decoration-primary group-hover:decoration-2 group-hover:underline-offset-4 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
           >
             {hit.title}
             {link.newTab && (

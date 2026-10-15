@@ -96,7 +96,7 @@ export default async function ActualitePage({ params }: Props) {
         </header>
 
         {item.coverImageUrl && (
-          <figure className="relative mt-8 aspect-[16/9] overflow-hidden rounded-3xl bg-muted shadow-lg md:aspect-[2/1]">
+          <figure className="relative mt-8 aspect-[16/9] overflow-hidden rounded-box bg-muted shadow-lg md:aspect-[2/1]">
             <CoverImage src={item.coverImageUrl} sizes="(min-width: 1152px) 1120px, 100vw" eager />
           </figure>
         )}
@@ -107,9 +107,9 @@ export default async function ActualitePage({ params }: Props) {
           </div>
 
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
               <NewsReactions slug={item.slug} variant="toolbar" labels={reactions} />
-              <span aria-hidden="true" className="mx-1 h-6 w-px bg-border print:hidden" />
+              <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-border sm:mx-1 sm:h-6 print:hidden" />
               <ArticleToolbar
                 targetId="article-body"
                 title={item.title}
@@ -133,7 +133,7 @@ export default async function ActualitePage({ params }: Props) {
         <section aria-labelledby="similar-articles" className="border-t bg-muted/40 py-16 print:hidden">
           <div className="mx-auto max-w-7xl px-4">
             <div className="flex flex-wrap items-end justify-between gap-4 border-b pb-4">
-              <h2 id="similar-articles" className="relative text-2xl font-extrabold text-foreground after:absolute after:-bottom-[18px] after:left-0 after:h-1 after:w-20 after:rounded-full after:bg-brand-green md:text-3xl">
+              <h2 id="similar-articles" className="relative text-2xl font-extrabold text-foreground after:absolute after:-bottom-[18px] after:left-0 after:h-1 after:w-20 after:rounded-[1px] after:bg-brand-green md:text-3xl">
                 {t("similar")}
               </h2>
               <Link href={categoryHref} className="group inline-flex items-center gap-1.5 font-semibold text-brand-ink">

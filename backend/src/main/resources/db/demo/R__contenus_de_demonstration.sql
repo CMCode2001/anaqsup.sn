@@ -86,17 +86,13 @@ ON CONFLICT (slug) DO NOTHING;
 -- Ancien slug de démonstration (remplacé par mot-du-secretaire-executif).
 DELETE FROM institutional_page WHERE slug = 'mot-de-la-direction';
 
+-- « Gouvernance » et « Missions » n'ont plus de version de démonstration : textes officiels installés par les
+-- migrations V17 et V18.
 INSERT INTO institutional_page (slug, title, summary, body_html, status, author, published_at)
 VALUES
   ('presentation', 'Présentation de l''ANAQ-Sup',
    'L''Autorité nationale d''Assurance Qualité de l''Enseignement supérieur, de la Recherche et de l''Innovation.',
    $$<p><em>Texte de démonstration — à remplacer par le texte officiel validé par l'ANAQ-Sup.</em></p><p>L'ANAQ-Sup veille à la qualité de l'enseignement supérieur, de la recherche et de l'innovation au Sénégal. Elle évalue les établissements et les programmes, et rend publiques ses décisions.</p>$$,
-   'PUBLIE', 'demo.redaction', now()),
-  ('missions', 'Nos missions', 'Évaluer, habiliter, accréditer et promouvoir la culture de la qualité.',
-   $$<p><em>Texte de démonstration — à remplacer par les missions officielles.</em></p><ul><li>Évaluer la qualité des établissements et des programmes.</li><li>Instruire les demandes d'habilitation et d'accréditation et publier les décisions.</li><li>Accompagner les établissements dans leur démarche qualité.</li><li>Promouvoir la culture de la qualité et informer le public.</li></ul>$$,
-   'PUBLIE', 'demo.redaction', now()),
-  ('gouvernance', 'Gouvernance', 'Organes de gouvernance et organisation des services.',
-   $$<p><em>Texte de démonstration — à remplacer par la présentation officielle des organes.</em></p><p>Conseil d'administration, Conseil scientifique, Secrétariat exécutif et services techniques.</p>$$,
    'PUBLIE', 'demo.redaction', now()),
   ('mot-du-secretaire-executif', 'Le mot du Secrétaire exécutif', 'Bienvenue sur le portail de l''ANAQ-Sup.',
    $$<p><em>Texte de démonstration — à remplacer par le message officiel.</em></p><p>Bienvenue sur le portail de l'ANAQ-Sup. Ce site présente nos missions, nos actualités et nos événements, et rend accessibles à tous les décisions d'habilitation et d'accréditation.</p><p>La qualité de l'enseignement supérieur est l'affaire de tous : établissements, étudiants, familles et employeurs.</p>$$,
@@ -172,10 +168,6 @@ FROM (VALUES
   ('presentation', 'About ANAQ-Sup',
    'The National Authority for Quality Assurance in Higher Education, Research and Innovation.',
    $$<p><em>Demonstration text — to be replaced by the official text approved by ANAQ-Sup.</em></p><p>ANAQ-Sup ensures the quality of higher education, research and innovation in Senegal. It evaluates institutions and programmes, and makes its decisions public.</p>$$),
-  ('missions', 'Our missions', 'Evaluating, approving, accrediting and promoting a culture of quality.',
-   $$<p><em>Demonstration text — to be replaced by the official missions.</em></p><ul><li>Evaluate the quality of institutions and programmes.</li><li>Process applications for institutional approval and programme accreditation, and publish the decisions.</li><li>Support institutions in their quality approach.</li><li>Promote a culture of quality and inform the public.</li></ul>$$),
-  ('gouvernance', 'Governance', 'Governing bodies and organisation of the departments.',
-   $$<p><em>Demonstration text — to be replaced by the official presentation of the governing bodies.</em></p><p>Board of Directors, Scientific Council, Executive Secretariat and technical departments.</p>$$),
   ('organigramme', 'Organisation chart', 'How ANAQ-Sup''s bodies and departments are organised.',
    $$<p><em>Demonstration organisation chart — to be replaced by the official chart (image or diagram).</em></p><ul><li><strong>Board of Directors</strong></li><li><strong>Scientific Council</strong></li><li><strong>Executive Secretariat</strong><ul><li>Institutional evaluation department</li><li>Programme evaluation department</li><li>Administration and finance department</li><li>Communication department</li></ul></li></ul>$$),
   ('mot-du-secretaire-executif', 'A word from the Executive Secretary', 'Welcome to the ANAQ-Sup portal.',

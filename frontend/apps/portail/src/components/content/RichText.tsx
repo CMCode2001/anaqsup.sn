@@ -5,11 +5,12 @@ import { cn } from "@anaqsup/ui/lib/utils";
  * il est servi tel quel ici. Typographie appliquée par sélecteurs (pas de plugin supplémentaire).
  * `lang` : langue du texte quand elle diffère de celle de la page (contenu non traduit).
  * Variante `article` : texte plus grand, réglable (A− / A+ via --article-scale), justifié avec coupure des mots
- * (pas de grands blancs entre les mots), titres intermédiaires alignés à gauche, lettrine verte.
+ * (pas de grands blancs entre les mots) dès la tablette, aligné à gauche sur téléphone (colonne trop étroite :
+ * coupures à presque chaque ligne), titres intermédiaires alignés à gauche, lettrine verte.
  */
 export const ARTICLE_TEXT = cn(
   "text-[calc(1.0625rem*var(--article-scale,1))] leading-[1.85] md:text-[calc(1.125rem*var(--article-scale,1))]",
-  "text-justify hyphens-auto [&_h2]:text-left [&_h3]:text-left",
+  "sm:text-justify sm:hyphens-auto [&_h2]:text-left [&_h3]:text-left",
   "[&>p:first-child]:first-letter:float-left [&>p:first-child]:first-letter:mt-1 [&>p:first-child]:first-letter:mr-3",
   "[&>p:first-child]:first-letter:font-heading [&>p:first-child]:first-letter:text-[4.25em] [&>p:first-child]:first-letter:leading-[0.8]",
   "[&>p:first-child]:first-letter:font-extrabold [&>p:first-child]:first-letter:text-brand-green",

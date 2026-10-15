@@ -29,7 +29,7 @@ export function CategoryBadge({ slug, label, size = "md", className }: {
     <span
       className={cn(
         "inline-flex max-w-full items-center gap-1.5 rounded-full border font-semibold tracking-wide uppercase",
-        size === "sm" ? "px-2.5 py-0.5 text-[0.6875rem]" : "px-3.5 py-1 text-xs",
+        size === "sm" ? "px-2.5 py-0.5 text-xs" : "px-3.5 py-1 text-xs",
         TONES[tone],
         className,
       )}

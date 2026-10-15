@@ -19,8 +19,8 @@ export async function DocumentCard({ publication }: { publication: Publication }
   const { title, fileUrl, fileType, fileSizeBytes, publishedOn } = publication;
 
   return (
-    <article className="group flex h-full flex-col rounded-3xl border bg-card p-4 shadow-sm transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border bg-muted">
+    <article className="group flex h-full flex-col rounded-box border bg-card p-4 shadow-sm transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-box border bg-muted">
         {publication.coverImageUrl ? (
           <CoverImage
             src={publication.coverImageUrl}

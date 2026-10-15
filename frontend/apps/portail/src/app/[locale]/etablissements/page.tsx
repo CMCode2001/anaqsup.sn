@@ -64,7 +64,7 @@ export default async function EtablissementsPage({ searchParams }: Props) {
             <Pagination pathname="/etablissements" params={{ q, avis, type: kind }} page={pageNumber} totalPages={result.page.totalPages} />
           </>
         ) : (
-          <p className="rounded-3xl bg-muted p-6">{t("Institutions.empty")}</p>
+          <p className="rounded-box bg-muted p-6">{t("Institutions.empty")}</p>
         )}
       </div>
     </>

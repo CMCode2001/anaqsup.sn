@@ -1,3 +1,4 @@
+import { networkInterfaces } from "node:os";
 import path from "node:path";
 
 import type { NextConfig } from "next";
@@ -12,6 +13,12 @@ const nextConfig: NextConfig = {
   // Monorepo pnpm : tracer les dépendances depuis la racine du workspace.
   outputFileTracingRoot: path.join(__dirname, "../../"),
   transpilePackages: ["@anaqsup/ui", "@anaqsup/api-client"],
+  // `pnpm dev` seulement : ouvrir le site depuis un téléphone du même réseau (http://<adresse du poste>:3000).
+  // Sans cela, Next.js bloque ses scripts de développement pour toute autre adresse que localhost.
+  allowedDevOrigins: Object.values(networkInterfaces())
+    .flat()
+    .filter((address) => address?.family === "IPv4" && !address.internal)
+    .map((address) => address!.address),
   experimental: {
     // Imports « barrel » : ne garder que les modules réellement utilisés.
     optimizePackageImports: ["motion", "radix-ui", "lucide-react"],

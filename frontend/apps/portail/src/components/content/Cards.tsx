@@ -23,8 +23,8 @@ export async function NewsCard({ item }: { item: NewsSummary }) {
   const t = await getTranslations("Common");
   const textLang = langAttr(item.lang, locale);
   return (
-    <Link href={{ pathname: "/actualites/[slug]", params: { slug: item.slug } }} className="group block h-full rounded-[1rem] focus-visible:outline-none">
-      <article className="flex h-full flex-col overflow-hidden rounded-[1rem] border bg-card shadow-[0_1px_3px_rgb(0_0_0/0.05)] transition-shadow duration-300 group-hover:shadow-lg group-focus-visible:ring-2 group-focus-visible:ring-ring">
+    <Link href={{ pathname: "/actualites/[slug]", params: { slug: item.slug } }} className="group block h-full rounded-box focus-visible:outline-none">
+      <article className="flex h-full flex-col overflow-hidden rounded-box border bg-card shadow-[0_1px_3px_rgb(0_0_0/0.05)] transition-shadow duration-300 group-hover:shadow-lg group-focus-visible:ring-2 group-focus-visible:ring-ring">
         <div className="relative aspect-[16/10] overflow-hidden bg-muted">
           <CoverImage
             src={item.coverImageUrl}
@@ -62,10 +62,10 @@ export async function EventCard({ event }: { event: EventSummary }) {
   const { day, month } = calendarDay(event.startsAt, locale);
   const textLang = langAttr(event.lang, locale);
   return (
-    <Link href={{ pathname: "/evenements/[slug]", params: { slug: event.slug } }} className="group block h-full rounded-3xl focus-visible:outline-none">
+    <Link href={{ pathname: "/evenements/[slug]", params: { slug: event.slug } }} className="group block h-full rounded-box focus-visible:outline-none">
       <Card className="h-full transition-all duration-300 ease-out group-hover:scale-[1.03] group-hover:shadow-xl group-focus-visible:ring-2 group-focus-visible:ring-ring">
         <CardContent className="flex gap-4">
-          <time dateTime={event.startsAt} className="flex size-16 shrink-0 flex-col items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+          <time dateTime={event.startsAt} className="flex size-16 shrink-0 flex-col items-center justify-center rounded-control bg-primary text-primary-foreground shadow-sm">
             <span className="font-heading text-2xl font-extrabold leading-none">{day}</span>
             <span className="text-xs font-semibold uppercase">{month}</span>
           </time>

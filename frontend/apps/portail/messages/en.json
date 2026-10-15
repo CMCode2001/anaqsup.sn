@@ -25,6 +25,7 @@
     "main": "Main navigation",
     "mobile": "Mobile navigation",
     "menu": "Menu",
+    "closeMenu": "Close menu",
     "homeLink": "{name} — home",
     "about": "About ANAQ-Sup",
     "presentation": "Overview",

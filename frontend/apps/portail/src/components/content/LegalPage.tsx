@@ -47,7 +47,7 @@ export async function legalMetadata(slug: LegalSlug): Promise<Metadata> {
 async function HelpCard({ className }: { className?: string }) {
   const t = await getTranslations("Legal");
   return (
-    <div className={cn("rounded-2xl border bg-card p-6 shadow-sm", className)}>
+    <div className={cn("rounded-box border bg-card p-6 shadow-sm", className)}>
       <p className="flex items-center gap-2 font-bold text-foreground">
         <CircleHelpIcon className="size-5 text-brand-ink" aria-hidden="true" />{t("helpTitle")}
       </p>
@@ -67,10 +67,10 @@ export async function LegalPageView({ slug }: { slug: LegalSlug }) {
   return (
     <>
       {/* Bandeau sous le menu, comme l'en-tête des autres rubriques. */}
-      <div aria-hidden="true" className="h-12 border-b bg-muted/60 md:h-16" />
+      <div aria-hidden="true" className="hidden h-16 border-b bg-muted/60 md:block" />
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:py-14 lg:grid-cols-[19.5rem_minmax(0,1fr)] lg:gap-10">
         <aside className="flex flex-col gap-6 lg:sticky lg:top-36 lg:self-start">
-          <nav aria-label={t("Legal.eyebrow")} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+          <nav aria-label={t("Legal.eyebrow")} className="overflow-hidden rounded-box border bg-card shadow-sm">
             <p className="border-b px-5 py-4 text-xs font-bold tracking-[0.16em] text-foreground uppercase">{t("Legal.eyebrow")}</p>
             <ul className="py-2">
               {(Object.keys(LEGAL_PAGES) as LegalSlug[]).map((key) => {
@@ -98,7 +98,7 @@ export async function LegalPageView({ slug }: { slug: LegalSlug }) {
           <HelpCard className="hidden lg:block" />
         </aside>
 
-        <article className="min-w-0 rounded-2xl border bg-card p-6 shadow-sm md:p-12">
+        <article className="min-w-0 rounded-box border bg-card p-6 shadow-sm md:p-12">
           <header className="flex items-start justify-between gap-6 border-b pb-8">
             <h1 lang={contentLang} className="text-3xl font-extrabold text-brand-ink md:text-4xl">{page.title}</h1>
             <BrandLogo height={40} className="hidden sm:inline-flex" />

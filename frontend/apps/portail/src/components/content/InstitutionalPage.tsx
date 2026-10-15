@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 
 import { CoverImage } from "@/components/content/CoverImage";
 import { FrenchOnlyNotice } from "@/components/content/FrenchOnlyNotice";
+import { GovernanceCards } from "@/components/content/GovernanceCards";
+import { MissionCards } from "@/components/content/MissionCards";
+import { splitSections } from "@/components/content/SectionCards";
 import { PageHeader } from "@/components/content/PageHeader";
 import { PersonCaption } from "@/components/content/PersonCaption";
 import { RichText } from "@/components/content/RichText";
@@ -39,6 +42,9 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
   const page = await api.page(slug, lang);
   if (!page) notFound();
   const contentLang = langAttr(page.lang, lang);
+  // Gouvernance et Missions (choix ANAQ-Sup) : cartes premium dès que le texte compte au moins deux intertitres.
+  const split = slug === "gouvernance" || slug === "missions" ? splitSections(page.bodyHtml) : null;
+  const cards = split && split.sections.length >= 2 ? split : null;
 
   return (
     <>
@@ -53,14 +59,27 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
       <article className={page.imageUrl ? "mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[18rem_minmax(0,1fr)] lg:gap-14" : "mx-auto max-w-7xl px-4 py-12"}>
         {/* Photo, nom et fonction, saisis dans le back-office : ex. le mot du Secrétaire exécutif. */}
         {page.imageUrl && (
-          <figure className="mx-auto w-full max-w-xs self-start overflow-hidden rounded-3xl bg-card shadow-lg ring-1 ring-foreground/5 md:sticky md:top-40">
+          <figure className="mx-auto w-full max-w-xs self-start overflow-hidden rounded-box bg-card shadow-lg ring-1 ring-foreground/5 md:sticky md:top-40">
             <div className="relative aspect-[4/5] bg-muted">
               <CoverImage src={page.imageUrl} sizes="(min-width: 768px) 288px, 80vw" eager />
             </div>
             <PersonCaption name={page.imageName} role={page.imageRole} size="md" />
           </figure>
         )}
-        {/* Aligné sur l'en-tête de la page ; ligne de lecture confortable. */}
+        {cards ? (
+          // Gouvernance : organigramme des organes ; Missions : liste éditoriale des missions (intertitres du texte).
+          <div>
+            <FrenchOnlyNotice lang={page.lang} className="mb-8" />
+            {cards.intro && <RichText html={cards.intro} lang={contentLang} className="mb-10 max-w-4xl" />}
+            {slug === "gouvernance"
+              ? <GovernanceCards sections={cards.sections} lang={contentLang} />
+              : <MissionCards sections={cards.sections} lang={contentLang} />}
+            <p className="mt-10 text-xs text-muted-foreground">
+              {t("Common.updatedOn", { date: formatDate(page.updatedAt, lang) })}
+            </p>
+          </div>
+        ) : (
+        /* Aligné sur l'en-tête de la page ; ligne de lecture confortable. */
         <div className="max-w-4xl">
           <FrenchOnlyNotice lang={page.lang} className="mb-8" />
           <RichText html={page.bodyHtml} lang={contentLang} />
@@ -68,6 +87,7 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
             {t("Common.updatedOn", { date: formatDate(page.updatedAt, lang) })}
           </p>
         </div>
+        )}
       </article>
       )}
     </>
@@ -85,15 +105,15 @@ function OrgChart({ imageUrl, title, subtitle, labels }: {
   subtitle: string | null | undefined;
   labels: { download: string; fullSize: string };
 }) {
-  const action = "inline-flex h-10 items-center gap-2 rounded-[0.625rem] border bg-background px-4 text-sm font-semibold text-foreground shadow-sm transition-colors hover:border-primary hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+  const action = "inline-flex h-10 items-center gap-2 rounded-control border bg-background px-4 text-sm font-semibold text-foreground shadow-sm transition-colors hover:border-primary hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
   return (
     <section className="mx-auto max-w-7xl px-4 py-12">
-      <figure className="mx-auto max-w-6xl rounded-2xl border bg-card p-5 shadow-sm md:p-8">
+      <figure className="mx-auto max-w-6xl rounded-box border bg-card p-5 shadow-sm md:p-8">
         <figcaption className="text-center">
           <h2 className="text-2xl font-extrabold text-foreground md:text-3xl">{title}</h2>
           {subtitle && <p className="mt-2 text-muted-foreground">{subtitle}</p>}
         </figcaption>
-        <a href={imageUrl} target="_blank" rel="noopener" className="mt-8 block overflow-hidden rounded-xl border bg-muted/40 p-3 md:p-6">
+        <a href={imageUrl} target="_blank" rel="noopener" className="mt-8 block overflow-hidden rounded-box border bg-muted/40 p-3 md:p-6">
           {/* Image entière, à sa taille réelle au plus : le texte de l'organigramme doit rester lisible. */}
           {/* eslint-disable-next-line @next/next/no-img-element -- dimensions inconnues, image lue en pleine résolution. */}
           <img src={imageUrl} alt={title} className="mx-auto h-auto max-w-full" loading="eager" />

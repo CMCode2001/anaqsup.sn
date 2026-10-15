@@ -55,7 +55,7 @@ export function DesktopNav({ label, groups }: { label: string; groups: ResolvedG
           const active = [group.href, ...(group.children ?? []).map((c) => c.href), ...group.section]
             .some((href) => href && within(pathname, href));
           const itemClass = cx(
-            "inline-flex h-9 items-center gap-1 rounded-full px-3.5 text-[13px] font-medium transition-colors hover:bg-muted hover:text-brand-ink",
+            "inline-flex h-9 items-center gap-1 rounded-control px-3.5 text-[13px] font-medium transition-colors hover:bg-muted hover:text-brand-ink",
             active && "font-semibold text-brand-ink",
           );
 
@@ -117,14 +117,14 @@ export function DesktopNav({ label, groups }: { label: string; groups: ResolvedG
                   aria-hidden="true"
                   className={cx("absolute top-1.5 size-3 rotate-45 rounded-[3px] border-t border-l bg-background", alignRight ? "right-8" : "left-8")}
                 />
-                <ul className="grid grid-cols-2 gap-1 rounded-3xl border bg-background p-3 shadow-xl">
+                <ul className="grid grid-cols-2 gap-1 rounded-box border bg-background p-3 shadow-xl">
                   {group.children.map((child) => (
                     <li key={child.href}>
                       <Link
                         href={child.href}
                         aria-current={pathname === child.href ? "page" : undefined}
                         onClick={() => setState(null)}
-                        className="group/item flex items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-sm font-medium transition-colors hover:bg-muted hover:text-brand-ink aria-[current=page]:bg-muted aria-[current=page]:font-semibold aria-[current=page]:text-brand-ink"
+                        className="group/item flex items-center justify-between gap-3 rounded-control px-4 py-3.5 text-sm font-medium transition-colors hover:bg-muted hover:text-brand-ink aria-[current=page]:bg-muted aria-[current=page]:font-semibold aria-[current=page]:text-brand-ink"
                       >
                         {child.label}
                         <ArrowRightIcon

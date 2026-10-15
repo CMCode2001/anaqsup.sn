@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, ChevronDownIcon, GlobeIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, LanguagesIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -9,7 +9,8 @@ import { LOCALE_NAMES, type Locale, routing } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 
 /**
- * Sélecteur de langue du bandeau supérieur, après les réseaux sociaux.
+ * Sélecteur de langue du bandeau supérieur, après les réseaux sociaux : pilule encadrée « FR · Français » avec l'icône
+ * de traduction (modèle du MESRI, choisi par l'ANAQ-Sup le 15/10/2026).
  * Chaque langue est un vrai lien (indexable, utilisable sans JavaScript) vers la même page traduite.
  */
 export function LocaleSwitcher({ locale, label }: { locale: Locale; label: string }) {
@@ -41,18 +42,24 @@ export function LocaleSwitcher({ locale, label }: { locale: Locale; label: strin
         aria-controls="langues"
         aria-label={label}
         onClick={() => setOpen(!open)}
-        className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/30 bg-white/5 px-3 font-medium whitespace-nowrap text-white transition-colors hover:border-white/50 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <GlobeIcon className="size-4 text-primary" aria-hidden="true" />
-        <span className="hidden sm:inline">{LOCALE_NAMES[locale]}</span>
-        <span className="uppercase sm:hidden">{locale}</span>
+        <LanguagesIcon className="size-4" aria-hidden="true" />
+        <span>
+          <span className="uppercase">{locale}</span>
+          {/* Très petits écrans (< 360 px) : « FR » seul, pour que le bandeau tienne sur une ligne. */}
+          <span className="max-[359px]:hidden">
+            <span aria-hidden="true" className="mx-1 text-white/60">·</span>
+            {LOCALE_NAMES[locale]}
+          </span>
+        </span>
         <ChevronDownIcon className={cx("size-3.5 transition-transform duration-200", open && "rotate-180")} aria-hidden="true" />
       </button>
       <ul
         id="langues"
         data-nav-panel
         className={cx(
-          "absolute top-full right-0 z-50 mt-2 w-40 rounded-2xl border bg-background p-1.5 text-foreground shadow-xl transition duration-200 ease-out",
+          "absolute top-full right-0 z-50 mt-2 w-40 rounded-box border bg-background p-1.5 text-foreground shadow-xl transition duration-200 ease-out",
           open ? "visible translate-y-0 opacity-100" : "pointer-events-none invisible -translate-y-1 opacity-0",
         )}
       >
@@ -63,7 +70,7 @@ export function LocaleSwitcher({ locale, label }: { locale: Locale; label: strin
               hrefLang={target}
               lang={target}
               aria-current={target === locale ? "true" : undefined}
-              className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium hover:bg-muted aria-[current=true]:text-brand-ink"
+              className="flex items-center justify-between rounded-control px-3 py-2 text-sm font-medium hover:bg-muted aria-[current=true]:text-brand-ink"
             >
               {LOCALE_NAMES[target]}
               {target === locale && <CheckIcon className="size-4 text-primary" aria-hidden="true" />}

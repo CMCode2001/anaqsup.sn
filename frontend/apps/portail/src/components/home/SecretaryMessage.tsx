@@ -31,13 +31,13 @@ export async function SecretaryMessage({ message }: { message: InstitutionalPage
       <Arc className="pointer-events-none absolute bottom-10 left-[3%] -z-10 hidden size-36 rotate-180 lg:block" color="var(--anthracite)" />
 
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-14 md:py-24">
-        <figure className="mx-auto w-full max-w-sm overflow-hidden rounded-3xl bg-card shadow-xl ring-1 ring-foreground/5 transition-transform duration-500 hover:scale-[1.02]">
+        <figure className="mx-auto w-full max-w-sm overflow-hidden rounded-box bg-card shadow-xl ring-1 ring-foreground/5 transition-transform duration-500 hover:scale-[1.02]">
           <div className="relative aspect-[4/5] bg-muted">
             {message.imageUrl ? (
               <CoverImage src={message.imageUrl} sizes="(min-width: 768px) 384px, 90vw" />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-brand-ink">
-                <span className="flex size-24 items-center justify-center rounded-full bg-background shadow-sm">
+                <span className="flex size-24 items-center justify-center rounded-control bg-background shadow-sm">
                   <UserRoundIcon className="size-12" aria-hidden="true" />
                 </span>
                 <span className="px-6 text-center text-xs text-muted-foreground">{t("Home.messagePhoto")}</span>
@@ -57,7 +57,7 @@ export async function SecretaryMessage({ message }: { message: InstitutionalPage
           )}
           <Link
             href="/anaq-sup/mot-du-secretaire-executif"
-            className="group mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-primary/15 px-6 text-sm font-semibold text-brand-ink transition-colors hover:bg-primary hover:text-primary-foreground"
+            className="group mt-8 inline-flex h-12 items-center gap-2 rounded-control bg-primary/15 px-6 text-sm font-semibold text-brand-ink transition-colors hover:bg-primary hover:text-primary-foreground"
           >
             {t("Common.readMore")}
             <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
