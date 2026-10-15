@@ -5,7 +5,9 @@ import { notFound } from "next/navigation";
 
 import { CoverImage } from "@/components/content/CoverImage";
 import { FrenchOnlyNotice } from "@/components/content/FrenchOnlyNotice";
-import { GovernanceCards, splitSections } from "@/components/content/GovernanceCards";
+import { GovernanceCards } from "@/components/content/GovernanceCards";
+import { MissionCards } from "@/components/content/MissionCards";
+import { splitSections } from "@/components/content/SectionCards";
 import { PageHeader } from "@/components/content/PageHeader";
 import { PersonCaption } from "@/components/content/PersonCaption";
 import { RichText } from "@/components/content/RichText";
@@ -40,9 +42,9 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
   const page = await api.page(slug, lang);
   if (!page) notFound();
   const contentLang = langAttr(page.lang, lang);
-  // Gouvernance (choix ANAQ-Sup) : cartes des organes dès que le texte compte au moins deux intertitres.
-  const split = slug === "gouvernance" ? splitSections(page.bodyHtml) : null;
-  const governance = split && split.sections.length >= 2 ? split : null;
+  // Gouvernance et Missions (choix ANAQ-Sup) : cartes premium dès que le texte compte au moins deux intertitres.
+  const split = slug === "gouvernance" || slug === "missions" ? splitSections(page.bodyHtml) : null;
+  const cards = split && split.sections.length >= 2 ? split : null;
 
   return (
     <>
@@ -64,12 +66,14 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
             <PersonCaption name={page.imageName} role={page.imageRole} size="md" />
           </figure>
         )}
-        {governance ? (
-          // Gouvernance : organigramme des organes (intertitres du texte), sur toute la largeur.
+        {cards ? (
+          // Gouvernance : organigramme des organes ; Missions : grille des missions (intertitres du texte).
           <div>
             <FrenchOnlyNotice lang={page.lang} className="mb-8" />
-            {governance.intro && <RichText html={governance.intro} lang={contentLang} className="mb-10 max-w-4xl" />}
-            <GovernanceCards sections={governance.sections} lang={contentLang} />
+            {cards.intro && <RichText html={cards.intro} lang={contentLang} className="mb-10 max-w-4xl" />}
+            {slug === "gouvernance"
+              ? <GovernanceCards sections={cards.sections} lang={contentLang} />
+              : <MissionCards sections={cards.sections} lang={contentLang} />}
             <p className="mt-10 text-xs text-muted-foreground">
               {t("Common.updatedOn", { date: formatDate(page.updatedAt, lang) })}
             </p>
