@@ -1,4 +1,4 @@
-import { ChevronDownIcon, MailIcon, MenuIcon, PhoneIcon } from "lucide-react";
+import { ChevronDownIcon, MailIcon, MenuIcon, PhoneIcon, SearchIcon } from "lucide-react";
 import { getLocale, getTranslations } from "@/i18n/server";
 
 import { BrandLogo } from "@anaqsup/ui/components/brand-logo";
@@ -13,14 +13,16 @@ import { siteSettings } from "@/lib/settings";
 import { site, telHref } from "@/lib/site";
 
 /**
- * En-tête : bandeau supérieur (coordonnées, réseaux sociaux, langue), logotype et menu.
+ * En-tête : bandeau supérieur (coordonnées, réseaux sociaux, langue), logotype, menu et loupe de recherche.
  * Le menu large est un petit composant client (sous-menus au survol) ; le menu mobile reste en <details>,
- * fonctionnel sans JavaScript.
+ * fonctionnel sans JavaScript. La loupe mène directement à la page de recherche (choix ANAQ-Sup : aucun panneau
+ * par-dessus la page).
  */
 export async function SiteHeader() {
   const locale = await getLocale();
   const t = await getTranslations("Nav");
   const tTop = await getTranslations("TopBar");
+  const tSearch = await getTranslations("Search");
   const { contact } = await siteSettings();
   const href = (pathname: Href) => getPathname({ locale, href: pathname });
 
@@ -67,44 +69,54 @@ export async function SiteHeader() {
           <BrandLogo height={44} />
         </Link>
 
-        <DesktopNav label={t("main")} groups={groups} />
+        <div className="flex items-center gap-2 xl:gap-3">
+          <DesktopNav label={t("main")} groups={groups} />
 
-        <details className="group xl:hidden">
-          <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium [&::-webkit-details-marker]:hidden">
-            <MenuIcon className="size-4" aria-hidden="true" /> {t("menu")}
-          </summary>
-          <nav aria-label={t("mobile")} className="absolute inset-x-0 top-full max-h-[calc(100dvh-8rem)] overflow-y-auto border-b bg-background px-4 py-4 shadow-lg">
-            <ul className="flex flex-col gap-1">
-              {groups.map((group) =>
-                group.children ? (
-                  <li key={group.id}>
-                    <details className="group/sub">
-                      <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl px-3 py-2.5 text-base font-medium hover:bg-muted [&::-webkit-details-marker]:hidden">
+          <Link
+            href="/recherches"
+            aria-label={tSearch("open")}
+            className="flex size-9.5 shrink-0 items-center justify-center rounded-full border text-brand-ink transition-colors hover:border-primary hover:bg-muted"
+          >
+            <SearchIcon className="size-[18px]" aria-hidden="true" />
+          </Link>
+
+          <details className="group xl:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium [&::-webkit-details-marker]:hidden">
+              <MenuIcon className="size-4" aria-hidden="true" /> {t("menu")}
+            </summary>
+            <nav aria-label={t("mobile")} className="absolute inset-x-0 top-full max-h-[calc(100dvh-8rem)] overflow-y-auto border-b bg-background px-4 py-4 shadow-lg">
+              <ul className="flex flex-col gap-1">
+                {groups.map((group) =>
+                  group.children ? (
+                    <li key={group.id}>
+                      <details className="group/sub">
+                        <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl px-3 py-2.5 text-base font-medium hover:bg-muted [&::-webkit-details-marker]:hidden">
+                          {group.label}
+                          <ChevronDownIcon className="size-4 transition-transform group-open/sub:rotate-180" aria-hidden="true" />
+                        </summary>
+                        <ul className="mt-1 mb-2 ml-3 flex flex-col gap-0.5 border-l-2 border-primary/40 pl-3">
+                          {group.children.map((child) => (
+                            <li key={child.href}>
+                              <a href={child.href} className="block rounded-xl px-3 py-2 text-[15px] text-muted-foreground hover:bg-muted hover:text-brand-ink">
+                                {child.label}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    </li>
+                  ) : (
+                    <li key={group.id}>
+                      <a href={group.href} className="block rounded-2xl px-3 py-2.5 text-base font-medium hover:bg-muted">
                         {group.label}
-                        <ChevronDownIcon className="size-4 transition-transform group-open/sub:rotate-180" aria-hidden="true" />
-                      </summary>
-                      <ul className="mt-1 mb-2 ml-3 flex flex-col gap-0.5 border-l-2 border-primary/40 pl-3">
-                        {group.children.map((child) => (
-                          <li key={child.href}>
-                            <a href={child.href} className="block rounded-xl px-3 py-2 text-[15px] text-muted-foreground hover:bg-muted hover:text-brand-ink">
-                              {child.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  </li>
-                ) : (
-                  <li key={group.id}>
-                    <a href={group.href} className="block rounded-2xl px-3 py-2.5 text-base font-medium hover:bg-muted">
-                      {group.label}
-                    </a>
-                  </li>
-                ),
-              )}
-            </ul>
-          </nav>
-        </details>
+                      </a>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </nav>
+          </details>
+        </div>
       </div>
     </header>
   );

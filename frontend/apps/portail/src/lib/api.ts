@@ -14,6 +14,8 @@ import type {
   ProgramPage,
   ProgramSummary,
   PublicationPage,
+  SearchPage,
+  SearchType,
   SiteSettings,
 } from "@anaqsup/api-client";
 
@@ -32,10 +34,10 @@ export class ApiUnavailableError extends Error {
  * GET serveur vers l'API publique, avec le cache de données de Next.js.
  * Renvoie `null` sur 404 ; lève `ApiUnavailableError` sinon (capturée par error.tsx).
  */
-async function get<T>(path: string, cache: { revalidate: number; tags?: string[] }): Promise<T | null> {
+async function get<T>(path: string, cache: { revalidate: number; tags?: string[] } | "no-store"): Promise<T | null> {
   const response = await fetch(`${serverEnv.apiInternalUrl}/api/v1/public${path}`, {
     headers: { Accept: "application/json" },
-    next: cache,
+    ...(cache === "no-store" ? { cache } : { next: cache }),
   });
   if (response.status === 404) {
     return null;
@@ -109,6 +111,11 @@ export const api = {
 
   program: (slug: string) =>
     get<ProgramSummary>(`/programs/${encodeURIComponent(slug)}`, { revalidate: REVALIDATE.fiche, tags: [`program:${slug}`] }),
+
+  // ------------------------------------------------------------------------------- recherche
+  // Hors cache de données : une entrée par texte saisi le remplirait sans limite (l'API garde une minute de cache).
+  search: (params: Paging & { q: string; lang: Lang; type?: SearchType; period?: string; category?: string; kind?: string }) =>
+    get<SearchPage>(`/search${query(params)}`, "no-store"),
 };
 
 /** Pour l'accueil : une rubrique indisponible ne doit pas faire tomber toute la page. */

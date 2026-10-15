@@ -46,7 +46,7 @@ export const routing = defineRouting({
     "/etablissements/[slug]": { fr: "/etablissements/[slug]", en: "/institutions/[slug]" },
     "/formations": { fr: "/formations", en: "/programmes" },
     "/formations/[slug]": { fr: "/formations/[slug]", en: "/programmes/[slug]" },
-    "/recherche": { fr: "/recherche", en: "/search" },
+    "/recherches": { fr: "/recherches", en: "/search" },
     "/procedures/habilitation": { fr: "/procedures/habilitation", en: "/procedures/institutional-approval" },
     "/procedures/accreditation": { fr: "/procedures/accreditation", en: "/procedures/programme-accreditation" },
 

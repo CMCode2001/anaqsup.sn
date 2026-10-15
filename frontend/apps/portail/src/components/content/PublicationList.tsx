@@ -1,6 +1,5 @@
 import type { PublicationKind } from "@anaqsup/api-client";
 import { ChevronDownIcon, SearchIcon, XIcon } from "lucide-react";
-import type { ReactNode } from "react";
 
 import { Button } from "@anaqsup/ui/components/button";
 import { Input } from "@anaqsup/ui/components/input";
@@ -8,6 +7,7 @@ import { cn } from "@anaqsup/ui/lib/utils";
 
 import { AutoSubmitForm } from "@/components/content/AutoSubmitForm";
 import { DocumentCard } from "@/components/content/DocumentCard";
+import { NativeSelect } from "@/components/content/NativeSelect";
 import { PageHeader } from "@/components/content/PageHeader";
 import { SectionNav } from "@/components/content/SectionNav";
 import { Pagination } from "@/components/registre/Pagination";
@@ -23,8 +23,8 @@ export const KIND_PAGES = {
   GUIDE: "/ressources-documentaires/guide-auto-evaluation",
 } as const satisfies Partial<Record<PublicationKind, StaticPathname>>;
 
-/** Ordre de la liste « Catégorie » de « Publications ». */
-const KINDS = ["TEXTE_REGLEMENTAIRE", "REFERENTIEL", "GUIDE", "RAPPORT_ANNUEL", "ETUDE", "DISCOURS", "AUTRE"] as const satisfies PublicationKind[];
+/** Ordre de la liste « Catégorie » de « Publications » (et du filtre de la recherche). */
+export const KINDS = ["TEXTE_REGLEMENTAIRE", "REFERENTIEL", "GUIDE", "RAPPORT_ANNUEL", "ETUDE", "DISCOURS", "AUTRE"] as const satisfies PublicationKind[];
 
 const SIZES = [12, 24, 48] as const;
 const DEFAULT_SIZE = 12;
@@ -33,31 +33,6 @@ const DEFAULT_SIZE = 12;
 export type PublicationSearchParams = { q?: string; type?: string; year?: string; page?: string; size?: string; goto?: string };
 
 type Filters = { q?: string; type?: string; year?: string; size?: string };
-
-/** Liste déroulante native : accessible, utilisable sans JavaScript. */
-function NativeSelect({ id, name, label, defaultValue, className, children }: {
-  id: string;
-  name: string;
-  label: string;
-  defaultValue: string;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className={cn("relative", className)}>
-      <label htmlFor={id} className="sr-only">{label}</label>
-      <select
-        id={id}
-        name={name}
-        defaultValue={defaultValue}
-        className="h-12 w-full cursor-pointer appearance-none truncate rounded-full border bg-background pr-11 pl-5 text-sm transition-colors outline-none hover:border-primary focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
-      >
-        {children}
-      </select>
-      <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-    </div>
-  );
-}
 
 /**
  * Documents d'une rubrique. « Publications » montre TOUS les documents (choix ANAQ-Sup) et propose une

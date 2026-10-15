@@ -42,7 +42,7 @@ export const NAV: NavGroup[] = [
   {
     label: "approvals",
     href: "/habilitations-et-accreditations",
-    section: ["/etablissements", "/formations", "/recherche", "/procedures/habilitation", "/procedures/accreditation"],
+    section: ["/etablissements", "/formations", "/procedures/habilitation", "/procedures/accreditation"],
   },
   {
     label: "resources",
