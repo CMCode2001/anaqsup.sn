@@ -20,7 +20,8 @@ import sn.anaqsup.portail.content.persistence.TranslationRepository.Type;
  * Pages légales créées par la migration V15 (décision ANAQ-Sup du 14/10/2026) : publiées en français et en
  * anglais, la version anglaise étant tenue pour une traduction automatique à jour (DeepL ne la refait que si le
  * français change). V16 : plus de YouTube (chaîne supprimée), ni dans les réseaux sociaux ni dans le texte.
- * V17 : page « Gouvernance » au texte officiel de l'ancien site, créée là où elle n'existait pas (production).
+ * V17 et V18 : pages « Gouvernance » et « Missions » au texte officiel de l'ancien site, créées là où elles
+ * n'existaient pas (production).
  * Contexte propre (propriété dédiée) : base fraîchement migrée, que les autres tests ne vident pas.
  */
 @SpringBootTest(properties = "anaqsup.test.contexte=pages-legales")
@@ -75,6 +76,22 @@ class LegalPagesIT {
                 .isLenientlyEqualTo("""
                         {"title": "Governance of ANAQ-Sup", "lang": "en"}""");
         assertThat(translations.pending(Type.PAGE, 100, 12)).noneMatch(page -> page.slug().equals("gouvernance"));
+    }
+
+    @Test
+    void pageMissionsOfficielle() {
+        assertThat(mvc.get().uri("/api/v1/public/pages/missions")).hasStatusOk()
+                .bodyJson().isLenientlyEqualTo("""
+                        {"title": "Missions de l'ANAQ-Sup", "lang": "fr"}""");
+        assertThat(mvc.get().uri("/api/v1/public/pages/missions")).bodyJson().extractingPath("$.bodyHtml").asString()
+                .contains("décret n° 2018-1956", "<h2>Standards de qualité</h2>", "<h2>Système d’assurance qualité</h2>",
+                        "<h2>Procédures formelles</h2>", "<h2>Avis technique</h2>", "<h2>Évaluation des établissements</h2>",
+                        "<h2>Évaluation des programmes de formation</h2>", "d’auto-évaluation")
+                .doesNotContain("démonstration", "auto- évaluation");
+        assertThat(mvc.get().uri("/api/v1/public/pages/missions?lang=en")).bodyJson()
+                .isLenientlyEqualTo("""
+                        {"title": "Missions of ANAQ-Sup", "lang": "en"}""");
+        assertThat(translations.pending(Type.PAGE, 100, 12)).noneMatch(page -> page.slug().equals("missions"));
     }
 
     @Test
