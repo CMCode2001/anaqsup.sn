@@ -280,6 +280,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Recherche sur tout le site
+         * @description Une seule liste, tous types confondus : les contenus dont le titre correspond d'abord, puis les plus
+         *     pertinents, puis les plus récents. Recherche par début de mot, insensible à la casse et aux accents ;
+         *     les mots de moins de deux lettres sont ignorés (liste vide s'il n'en reste aucun).
+         *
+         *     Les filtres écartent les types qui ne les connaissent pas : une période écarte les pages et le registre
+         *     (sans date), une rubrique ne garde que les actualités, un type de document que les documents.
+         *     Sert aussi les suggestions pendant la frappe (`size` réduit).
+         */
+        get: operations["searchSite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -507,6 +533,41 @@ export interface components {
                     en?: string | null;
                 };
             };
+        };
+        /** @enum {string} */
+        SearchType: "news" | "events" | "publications" | "establishments" | "programs" | "pages";
+        SearchHit: {
+            type: components["schemas"]["SearchType"];
+            slug: components["schemas"]["Slug"];
+            /** @description Titre, nom de l'établissement ou intitulé de la formation */
+            title: string;
+            /** @description Résumé ; domaine pour une formation */
+            excerpt?: string | null;
+            /**
+             * Format: date
+             * @description Publication, début de l'événement ou date du document
+             */
+            date?: string | null;
+            /** @description Rubrique d'actualités, lieu, sigle et ville, ou établissement */
+            label?: string | null;
+            /** @description Rubrique d'une actualité (slug), type de document (PublicationKind) ou avis (Avis) */
+            code?: string | null;
+            /**
+             * Format: uri-reference
+             * @description Document à ouvrir (documents)
+             */
+            fileUrl?: string | null;
+            /**
+             * Format: uri-reference
+             * @description Vignette
+             */
+            imageUrl?: string | null;
+            /** @description Langue du texte renvoyé */
+            lang: components["schemas"]["Lang"];
+        };
+        SearchPage: {
+            content: components["schemas"]["SearchHit"][];
+            page: components["schemas"]["PageMeta"];
         };
         /** @description RFC 9457 */
         Problem: {
@@ -995,6 +1056,44 @@ export interface operations {
                     "application/json": components["schemas"]["SiteSettings"];
                 };
             };
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    searchSite: {
+        parameters: {
+            query: {
+                /** @description Texte recherché */
+                q: string;
+                /** @description Langue souhaitée ; repli sur le français si la traduction n'existe pas. */
+                lang?: components["parameters"]["Lang"];
+                /** @description Un seul type de résultats */
+                type?: components["schemas"]["SearchType"];
+                /** @description `month` : le dernier mois ; `year` : la dernière année (événements à venir compris) ; ou une année civile. */
+                period?: string;
+                /** @description Rubrique d'actualités */
+                category?: components["schemas"]["Slug"];
+                /** @description Type de document */
+                kind?: components["schemas"]["PublicationKind"];
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page de résultats */
+            200: {
+                headers: {
+                    "Cache-Control": components["headers"]["CacheControl"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             429: components["responses"]["TooManyRequests"];
         };
     };

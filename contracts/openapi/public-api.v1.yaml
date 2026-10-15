@@ -50,6 +50,8 @@ tags:
     description: Formations et avis d'accréditation.
   - name: Statistiques
     description: Nombre d'avis favorables publiés.
+  - name: Recherche
+    description: Recherche sur tout le site (actualités, événements, documents, établissements, formations, pages).
   - name: Paramètres du site
     description: Coordonnées, réseaux sociaux, liens utiles et textes d'introduction modifiés dans le back-office.
 
@@ -338,6 +340,42 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/SiteSettings' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/search:
+    get:
+      tags: [Recherche]
+      operationId: searchSite
+      summary: Recherche sur tout le site
+      description: |
+        Une seule liste, tous types confondus : les contenus dont le titre correspond d'abord, puis les plus
+        pertinents, puis les plus récents. Recherche par début de mot, insensible à la casse et aux accents ;
+        les mots de moins de deux lettres sont ignorés (liste vide s'il n'en reste aucun).
+
+        Les filtres écartent les types qui ne les connaissent pas : une période écarte les pages et le registre
+        (sans date), une rubrique ne garde que les actualités, un type de document que les documents.
+        Sert aussi les suggestions pendant la frappe (`size` réduit).
+      security: []
+      parameters:
+        - { name: q, in: query, required: true, description: Texte recherché, schema: { type: string, minLength: 2, maxLength: 100 } }
+        - $ref: '#/components/parameters/Lang'
+        - { name: type, in: query, description: 'Un seul type de résultats', schema: { $ref: '#/components/schemas/SearchType' } }
+        - name: period
+          in: query
+          description: '`month` : le dernier mois ; `year` : la dernière année (événements à venir compris) ; ou une année civile.'
+          schema: { type: string, pattern: '^(month|year|(19|20)\d{2})$', example: '2025' }
+        - { name: category, in: query, description: Rubrique d'actualités, schema: { $ref: '#/components/schemas/Slug' } }
+        - { name: kind, in: query, description: Type de document, schema: { $ref: '#/components/schemas/PublicationKind' } }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, maximum: 49, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 50, default: 10 } }
+      responses:
+        '200':
+          description: Page de résultats
+          headers: { Cache-Control: { $ref: '#/components/headers/CacheControl' } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SearchPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '429': { $ref: '#/components/responses/TooManyRequests' }
 
 components:
@@ -660,6 +698,34 @@ components:
             properties:
               fr: { type: [string, 'null'], maxLength: 600 }
               en: { type: [string, 'null'], maxLength: 600 }
+
+    # ------------------------------------------------------------------------------- recherche
+
+    SearchType:
+      type: string
+      enum: [news, events, publications, establishments, programs, pages]
+
+    SearchHit:
+      type: object
+      required: [type, slug, title, lang]
+      properties:
+        type: { $ref: '#/components/schemas/SearchType' }
+        slug: { $ref: '#/components/schemas/Slug' }
+        title: { type: string, description: 'Titre, nom de l''établissement ou intitulé de la formation' }
+        excerpt: { type: [string, 'null'], description: 'Résumé ; domaine pour une formation' }
+        date: { type: [string, 'null'], format: date, description: 'Publication, début de l''événement ou date du document' }
+        label: { type: [string, 'null'], description: 'Rubrique d''actualités, lieu, sigle et ville, ou établissement' }
+        code: { type: [string, 'null'], description: 'Rubrique d''une actualité (slug), type de document (PublicationKind) ou avis (Avis)' }
+        fileUrl: { type: [string, 'null'], format: uri-reference, description: Document à ouvrir (documents) }
+        imageUrl: { type: [string, 'null'], format: uri-reference, description: Vignette }
+        lang: { $ref: '#/components/schemas/Lang', description: Langue du texte renvoyé }
+
+    SearchPage:
+      type: object
+      required: [content, page]
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/SearchHit' } }
+        page: { $ref: '#/components/schemas/PageMeta' }
 
     Problem:
       type: object
