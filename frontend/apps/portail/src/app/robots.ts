@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   // Pages de résultats de recherche : utiles aux visiteurs, pas aux moteurs (contenu dupliqué).
-  const searchPages = routing.locales.map((locale) => getPathname({ locale, href: "/recherche" }));
+  const searchPages = routing.locales.map((locale) => getPathname({ locale, href: "/recherches" }));
   return {
     rules: [{ userAgent: "*", allow: "/", disallow: ["/api/", ...searchPages] }],
     sitemap: `${site.url}/sitemap.xml`,

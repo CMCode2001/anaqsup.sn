@@ -27,6 +27,9 @@ export type InstitutionalPage = Schemas["InstitutionalPage"];
 export type Partner = Schemas["Partner"];
 export type Statistics = Schemas["Statistics"];
 export type SiteSettings = Schemas["SiteSettings"];
+export type SearchType = Schemas["SearchType"];
+export type SearchHit = Schemas["SearchHit"];
+export type SearchPage = Schemas["SearchPage"];
 export type Problem = Schemas["Problem"];
 
 /**

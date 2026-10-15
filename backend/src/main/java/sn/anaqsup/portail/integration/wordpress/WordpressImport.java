@@ -3,6 +3,8 @@ package sn.anaqsup.portail.integration.wordpress;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -44,7 +47,9 @@ import sn.anaqsup.portail.medias.MediaStorage;
  *   <li>actualités : flux RSS paginé (texte complet, date, catégories), image principale lue sur la page
  *       de chaque article et copiée dans la médiathèque ;</li>
  *   <li>documents : PDF des pages Textes réglementaires, Référentiels et Publications, copiés dans la
- *       médiathèque avec leur vignette (première page).</li>
+ *       médiathèque avec leur vignette (première page) ;</li>
+ *   <li>articles publiés par erreur en « Communiqués » (rapports, discours) : repris comme documents, ou
+ *       retirés (voir {@link Reclassement}).</li>
  * </ul>
  * L'API REST de l'ancien site est fermée (401) : seules ses pages publiques sont lues. L'import est relançable :
  * ce qui a déjà été repris est ignoré.
@@ -88,6 +93,7 @@ class WordpressImport implements ApplicationRunner {
         final AtomicInteger already = new AtomicInteger();
         final AtomicInteger duplicates = new AtomicInteger();
         final AtomicInteger withoutImage = new AtomicInteger();
+        final AtomicInteger removed = new AtomicInteger();
         final AtomicInteger failed = new AtomicInteger();
     }
 
@@ -96,10 +102,13 @@ class WordpressImport implements ApplicationRunner {
         log.info("Reprise WordPress depuis {} : début", site);
         Report articles = new Report();
         Report documents = new Report();
+        Report misfiled = new Report();
         try {
-            importArticles(articles);
+            List<FeedItem> toReclassify = importArticles(articles);
             importDocuments(documents);
-            content.announce(List.of("news", "publications"));
+            List<String> tags = new ArrayList<>(List.of("news", "publications"));
+            tags.addAll(reclassify(toReclassify, misfiled));
+            content.announce(tags);
         } catch (RuntimeException e) {
             log.error("Reprise WordPress interrompue", e);
             articles.failed.incrementAndGet();
@@ -109,10 +118,13 @@ class WordpressImport implements ApplicationRunner {
                 articles.duplicates, articles.withoutImage, articles.failed);
         log.info("Reprise WordPress — documents : {} trouvés, {} importés, {} déjà présents, {} doublons ignorés, {} en échec",
                 documents.found, documents.imported, documents.already, documents.duplicates, documents.failed);
+        log.info("Reprise WordPress — articles mal classés : {} trouvés, {} devenus documents, {} documents déjà présents, "
+                        + "{} actualités retirées, {} en échec", misfiled.found, misfiled.imported, misfiled.already,
+                misfiled.removed, misfiled.failed);
         if (exitWhenDone) {
             // Laisse le temps au webhook du portail (après validation) de partir avant l'arrêt.
             pause(Duration.ofSeconds(5));
-            int failures = articles.failed.get() + documents.failed.get();
+            int failures = articles.failed.get() + documents.failed.get() + misfiled.failed.get();
             System.exit(SpringApplication.exit(context, () -> failures == 0 ? 0 : 1));
         }
     }
@@ -124,11 +136,15 @@ class WordpressImport implements ApplicationRunner {
                             List<String> categories, Instant publishedAt) {
     }
 
-    /** Article prêt à enregistrer : identifiant connu, image copiée (ou absente). */
-    private record Prepared(long wordpressId, @Nullable UUID cover, boolean already) {
+    /**
+     * Article prêt à enregistrer : identifiant connu, image copiée (ou absente). {@code misfiled} : article de
+     * {@link Reclassement}, à traiter comme un document (aucune image copiée).
+     */
+    private record Prepared(long wordpressId, @Nullable UUID cover, boolean already, boolean misfiled) {
     }
 
-    private void importArticles(Report report) {
+    /** @return les articles mal classés de l'ancien site (voir {@link Reclassement}), traités après les documents */
+    private List<FeedItem> importArticles(Report report) {
         List<FeedItem> items = readFeed();
         report.found.set(items.size());
         log.info("Flux RSS lu : {} articles", items.size());
@@ -136,9 +152,12 @@ class WordpressImport implements ApplicationRunner {
         // Doublons de l'ancien site (même titre, même date) : seul le premier est repris.
         Set<String> seen = new HashSet<>();
         List<FeedItem> todo = new ArrayList<>();
+        List<FeedItem> misfiled = new ArrayList<>();
         for (FeedItem item : items) {
             if (!seen.add(WordpressParsing.plain(item.title()) + "|" + item.publishedAt())) {
                 report.duplicates.incrementAndGet();
+            } else if (item.wordpressId() != null && Reclassement.ACTIONS.containsKey(item.wordpressId())) {
+                misfiled.add(item);
             } else if (item.wordpressId() != null && content.hasArticle(item.wordpressId())) {
                 report.already.incrementAndGet();
             } else {
@@ -165,6 +184,11 @@ class WordpressImport implements ApplicationRunner {
                 FeedItem item = entry.getKey();
                 try {
                     Prepared prepared = entry.getValue().get();
+                    if (prepared.misfiled()) {
+                        misfiled.add(new FeedItem(prepared.wordpressId(), item.link(), item.title(), item.descriptionHtml(),
+                                item.contentHtml(), item.categories(), item.publishedAt()));
+                        continue;
+                    }
                     if (prepared.already()) {
                         report.already.incrementAndGet();
                         continue;
@@ -174,7 +198,7 @@ class WordpressImport implements ApplicationRunner {
                     }
                     boolean created = content.importArticle(new Article(prepared.wordpressId(), WordpressParsing.slug(item.link()),
                             item.title(), emptyToNull(WordpressParsing.summary(item.descriptionHtml())),
-                            WordpressParsing.body(item.contentHtml()), WordpressParsing.category(item.categories()),
+                            WordpressParsing.body(item.contentHtml()), WordpressParsing.category(item.categories(), item.title()),
                             item.publishedAt(), prepared.cover()));
                     (created ? report.imported : report.already).incrementAndGet();
                 } catch (Exception e) {
@@ -186,6 +210,7 @@ class WordpressImport implements ApplicationRunner {
                 }
             }
         }
+        return misfiled;
     }
 
     private List<FeedItem> readFeed() {
@@ -230,17 +255,20 @@ class WordpressImport implements ApplicationRunner {
                 throw e; // sans la page, l'article n'a pas d'identifiant : il sera repris au prochain passage
             }
             log.warn("Page d'article illisible ({}) : {}", item.link(), e.getMessage());
-            return new Prepared(item.wordpressId(), null, false);
+            return new Prepared(item.wordpressId(), null, false, false);
         }
         Long id = item.wordpressId();
         if (id == null) {
             id = WordpressParsing.pageId(page).stream().boxed().findFirst()
                     .orElseThrow(() -> new IOException("Identifiant WordPress introuvable sur " + item.link()));
+            if (Reclassement.ACTIONS.containsKey(id)) {
+                return new Prepared(id, null, false, true);
+            }
             if (content.hasArticle(id)) {
-                return new Prepared(id, null, true);
+                return new Prepared(id, null, true, false);
             }
         }
-        return new Prepared(id, cover(WordpressParsing.coverCandidates(page)), false);
+        return new Prepared(id, cover(WordpressParsing.coverCandidates(page)), false, false);
     }
 
     /** Première variante de l'image principale acceptée par la médiathèque ; null si aucune. */
@@ -315,6 +343,52 @@ class WordpressImport implements ApplicationRunner {
                 log.warn("Document non repris ({}) : {}", link.url(), e.toString());
             }
         }
+    }
+
+    // ------------------------------------------------------------------------------------- articles mal classés
+
+    /**
+     * Rapports et discours publiés en actualités sur l'ancien site : repris comme documents (PDF copié, vignette),
+     * sauf s'ils existent déjà ; l'actualité correspondante, si un import précédent l'avait reprise, est retirée.
+     * Une actualité n'est retirée que si son document est bien en place.
+     * @return étiquettes de cache des actualités retirées
+     */
+    private List<String> reclassify(List<FeedItem> items, Report report) {
+        report.found.set(items.size());
+        List<String> tags = new ArrayList<>();
+        for (FeedItem item : items) {
+            long id = Objects.requireNonNull(item.wordpressId());
+            try {
+                switch (Reclassement.ACTIONS.get(id)) {
+                    case Reclassement.VersDocuments target -> moveToDocuments(item, target, report);
+                    case Reclassement.Retire retire -> log.info("Article {} non repris : {}", item.link(), retire.motif());
+                }
+                content.removeArticle(id).ifPresent(slug -> {
+                    tags.add("news:" + slug);
+                    report.removed.incrementAndGet();
+                });
+            } catch (IOException | RuntimeException e) {
+                report.failed.incrementAndGet();
+                log.warn("Article mal classé non traité ({}) : {}", item.link(), e.toString());
+            }
+        }
+        return tags;
+    }
+
+    private void moveToDocuments(FeedItem item, Reclassement.VersDocuments target, Report report) throws IOException {
+        String title = target.title() != null ? target.title() : item.title().strip();
+        String pdf = WordpressParsing.firstPdf(item.contentHtml(), site + "/")
+                .orElseThrow(() -> new IOException("aucun PDF dans l'article"));
+        if (content.hasDocument(pdf) || content.hasDocumentTitled(target.kind(), title)) {
+            report.already.incrementAndGet();
+            return;
+        }
+        byte[] bytes = http.bytes(pdf, 30 * 1024 * 1024);
+        var stored = media.storeDocument(bytes, WordpressParsing.fileName(pdf), LegacyContentImport.AUTHOR);
+        boolean created = content.importDocument(new LegacyContentImport.Document(pdf, title, target.kind(),
+                LocalDate.ofInstant(item.publishedAt(), ZoneOffset.UTC), stored.file().id(),
+                stored.thumbnail() == null ? null : stored.thumbnail().id()));
+        (created ? report.imported : report.already).incrementAndGet();
     }
 
     // ------------------------------------------------------------------------------------- utilitaires

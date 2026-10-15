@@ -13,13 +13,25 @@ class WordpressParsingTest {
 
     @Test
     void anciennesCategoriesRangeesDansCellesDuNouveauSite() {
-        assertThat(WordpressParsing.category(List.of("Partenariat"))).isEqualTo("cooperation-et-partenariats");
-        assertThat(WordpressParsing.category(List.of("Actualité", "Visite"))).isEqualTo("cooperation-et-partenariats");
-        assertThat(WordpressParsing.category(List.of("Rapports annuels"))).isEqualTo("communiques");
-        assertThat(WordpressParsing.category(List.of("Discours du SE"))).isEqualTo("communiques");
-        assertThat(WordpressParsing.category(List.of("Actualité"))).isEqualTo("vie-institutionnelle");
-        assertThat(WordpressParsing.category(List.of("Non classée"))).isEqualTo("vie-institutionnelle");
-        assertThat(WordpressParsing.category(List.of())).isEqualTo("vie-institutionnelle");
+        assertThat(WordpressParsing.category(List.of("Partenariat"), "Atelier")).isEqualTo("cooperation-et-partenariats");
+        assertThat(WordpressParsing.category(List.of("Actualité", "Visite"), "Atelier")).isEqualTo("cooperation-et-partenariats");
+        assertThat(WordpressParsing.category(List.of("Rapports annuels"), "Atelier")).isEqualTo("communiques");
+        assertThat(WordpressParsing.category(List.of("Discours du SE"), "Atelier")).isEqualTo("communiques");
+        assertThat(WordpressParsing.category(List.of("Actualité"), "Atelier")).isEqualTo("vie-institutionnelle");
+        assertThat(WordpressParsing.category(List.of("Non classée"), "Atelier")).isEqualTo("vie-institutionnelle");
+        assertThat(WordpressParsing.category(List.of(), "Atelier")).isEqualTo("vie-institutionnelle");
+    }
+
+    @Test
+    void appelsRangesDansAppelsACandidaturesQuelleQueSoitLeurCategorie() {
+        for (String title : List.of("APPEL À MANIFESTATION D’INTÉRÊT, VAGUE 2019", "Avis à manifestation d’intérêt",
+                "AVIS D’APPEL À CANDIDATURES FORMATION DIES", "Appel à candidature", "Appel à communication",
+                "Recrutement des experts évaluateurs externes", "PROLONGATION POUR LA SOUMISSION DES PROGRAMMES",
+                "Prorogation du délai de soumission de programmes")) {
+            assertThat(WordpressParsing.category(List.of("Actualité"), title)).as(title).isEqualTo("appels-a-candidatures");
+        }
+        assertThat(WordpressParsing.category(List.of("Partenariat"), "Visite de l’ANAQ-Sup à l’UGB"))
+                .isEqualTo("cooperation-et-partenariats");
     }
 
     @Test
@@ -99,5 +111,14 @@ class WordpressParsingTest {
         assertThat(WordpressParsing.encode("https://anaqsup.sn/uploads/Re%CC%81f-prog.pdf"))
                 .isEqualTo("https://anaqsup.sn/uploads/Re%CC%81f-prog.pdf");
         assertThat(WordpressParsing.fileName("https://anaqsup.sn/uploads/Re%CC%81f-prog.pdf")).isEqualTo("Réf-prog.pdf");
+    }
+
+    @Test
+    void premierPdfDUnArticlePublieCommeActualite() {
+        assertThat(WordpressParsing.firstPdf("""
+                <p><a href="/wp-content/uploads/2023/08/rapport-2014.pdf">Rapport d’activités 2014</a></p>
+                <p><a href="https://anaqsup.sn/autre.PDF">Annexe</a></p>""", "https://anaqsup.sn/"))
+                .contains("https://anaqsup.sn/wp-content/uploads/2023/08/rapport-2014.pdf");
+        assertThat(WordpressParsing.firstPdf("<p>Rapport à venir.</p>", "https://anaqsup.sn/")).isEmpty();
     }
 }

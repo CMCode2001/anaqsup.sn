@@ -26,6 +26,8 @@ const nextConfig: NextConfig = {
     return [
       // Rubrique « Publications » devenue « Ressources documentaires » (menu validé le 13/10/2026).
       { source: "/publications", destination: "/ressources-documentaires/publications", permanent: true },
+      // Page de recherche renommée au pluriel (recherche sur tout le site, demande ANAQ-Sup du 15/10/2026).
+      { source: "/recherche", destination: "/recherches", permanent: true },
     ];
   },
   // Les en-têtes de sécurité (HSTS, CSP…) sont posés par Nginx : devops/nginx/snippets/.

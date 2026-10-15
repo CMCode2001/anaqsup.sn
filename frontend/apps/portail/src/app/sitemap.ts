@@ -8,7 +8,7 @@ import { site } from "@/lib/site";
 export const revalidate = 3600;
 
 /** Pages fixes : toutes les routes sans paramètre, sauf la recherche et la redirection de rubrique. */
-const EXCLUDED: Pathname[] = ["/recherche", "/ressources-documentaires"];
+const EXCLUDED: Pathname[] = ["/recherches", "/ressources-documentaires"];
 const STATIC_ROUTES = (Object.keys(routing.pathnames) as Pathname[]).filter(
   (pathname): pathname is StaticPathname => !pathname.includes("[") && !EXCLUDED.includes(pathname),
 );

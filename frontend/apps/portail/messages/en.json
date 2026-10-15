@@ -52,7 +52,10 @@
     "contactUs": "Contact us",
     "writeUs": "Write to ANAQ-Sup",
     "newTab": "(opens in a new tab)",
-    "copyright": "© {year} {name} — Republic of Senegal"
+    "copyright": "© {year} {name} — Republic of Senegal",
+    "legal": "Legal information",
+    "legalNotice": "Legal notice",
+    "privacy": "Personal data"
   },
   "Common": {
     "frenchOnly": "This content is only available in French.",
@@ -198,7 +201,7 @@
     "emptyFiltered": "No documents match your search. Try other words or remove a filter."
   },
   "PublicationKind": {
-    "RAPPORT_ANNUEL": "Annual report",
+    "RAPPORT_ANNUEL": "Report",
     "REFERENTIEL": "Quality standard",
     "GUIDE": "Guide",
     "TEXTE_REGLEMENTAIRE": "Regulation",
@@ -207,7 +210,7 @@
     "AUTRE": "Other"
   },
   "PublicationKinds": {
-    "RAPPORT_ANNUEL": "Annual reports",
+    "RAPPORT_ANNUEL": "Reports",
     "REFERENTIEL": "Quality standards",
     "GUIDE": "Guides",
     "TEXTE_REGLEMENTAIRE": "Regulations",
@@ -293,11 +296,52 @@
     "verify": "Check",
     "submit": "Search",
     "metaTitle": "Search",
-    "eyebrow": "Approvals & accreditations",
-    "title": "Search for an institution or a programme",
     "institutions": "Institutions ({count})",
     "programmes": "Programmes ({count})",
-    "seeAll": "See all →"
+    "seeAll": "See all →",
+    "siteLabel": "Search the website",
+    "sitePlaceholder": "News, document, institution, programme…",
+    "pageTitle": "Search",
+    "open": "Search the website",
+    "suggestions": "Suggestions",
+    "loading": "Searching…",
+    "noSuggestion": "No results for this text.",
+    "seeAllSuggestions": "See all results",
+    "results": "{count, plural, =0 {No results} one {# result} other {# results}}",
+    "resultsFor": "for “{query}”",
+    "resultsTotal": "{count, plural, one {# result in total} other {# results in total}}",
+    "noResults": "Check the spelling, try more general words or widen the filters.",
+    "showAll": "Search all content",
+    "hint": "Type at least two characters: news, events, documents, institutions, programmes and website pages.",
+    "filters": "Search filters",
+    "filterType": "Content type",
+    "filterPeriod": "Period",
+    "filterCategory": "News section",
+    "filterKind": "Document type",
+    "apply": "Filter",
+    "allTypes": "All content",
+    "allDates": "All dates",
+    "lastMonth": "Past month",
+    "lastYear": "Past year",
+    "allCategories": "All sections",
+    "allKinds": "All documents",
+    "filter": {
+      "news": "News",
+      "events": "Events",
+      "publications": "Documents",
+      "registry": "Approvals & accreditations",
+      "pages": "Website pages"
+    },
+    "type": {
+      "news": "News",
+      "events": "Event",
+      "publications": "Document",
+      "establishments": "Institution",
+      "programs": "Programme",
+      "pages": "Page"
+    },
+    "pdf": "PDF",
+    "opensInNewTab": "(PDF, opens in a new tab)"
   },
   "Procedures": {
     "factSheet": "Fact sheet",
@@ -336,5 +380,13 @@
     "title": "Page not found",
     "text": "This page does not exist or has moved. Old addresses of the site are redirected automatically; if you followed a link, search directly:",
     "home": "Back to home"
+  },
+  "Legal": {
+    "eyebrow": "Legal information",
+    "legalNotice": "Legal notice",
+    "privacy": "Personal data",
+    "helpTitle": "Need help?",
+    "helpText": "A question about this information or about your personal data? ANAQ-Sup is here to help.",
+    "contact": "Contact us"
   }
 }

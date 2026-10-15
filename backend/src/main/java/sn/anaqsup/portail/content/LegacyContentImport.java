@@ -3,6 +3,7 @@ package sn.anaqsup.portail.content;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -62,6 +63,20 @@ public class LegacyContentImport {
 
     public boolean hasDocument(String legacyUrl) {
         return repository.hasDocument(legacyUrl);
+    }
+
+    /** Document de même type et de même titre déjà présent (même ajouté à la main) : à ne pas recréer. */
+    public boolean hasDocumentTitled(String kind, String title) {
+        return repository.hasDocumentTitled(kind, title);
+    }
+
+    /**
+     * Article publié par erreur en actualité sur l'ancien site (document, doublon) : retiré du site.
+     * @return son adresse, s'il avait été repris
+     */
+    @Transactional
+    public Optional<String> removeArticle(long wordpressId) {
+        return repository.deleteArticle(wordpressId);
     }
 
     /** @return faux si l'article avait déjà été repris */

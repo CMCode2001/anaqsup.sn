@@ -44,6 +44,19 @@ server {
         include /etc/nginx/snippets/proxy.conf;
     }
 
+    # Recherche sur tout le site : page de résultats et ses suggestions pendant la frappe, rendues à chaque requête
+    # (même débit que la recherche de l'API, voir nginx.conf).
+    location = /api/search {
+        limit_req zone=search burst=10 nodelay;
+        proxy_pass http://portail;
+        include /etc/nginx/snippets/proxy.conf;
+    }
+    location ~ ^/(recherches|en/search)$ {
+        limit_req zone=search burst=10 nodelay;
+        proxy_pass http://portail;
+        include /etc/nginx/snippets/proxy.conf;
+    }
+
     location / {
         proxy_pass http://portail;
         include /etc/nginx/snippets/proxy.conf;

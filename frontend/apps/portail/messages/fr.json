@@ -52,7 +52,10 @@
     "contactUs": "Nous contacter",
     "writeUs": "Écrire à l'ANAQ-Sup",
     "newTab": "(nouvel onglet)",
-    "copyright": "© {year} {name} — République du Sénégal"
+    "copyright": "© {year} {name} — République du Sénégal",
+    "legal": "Informations légales",
+    "legalNotice": "Mentions légales",
+    "privacy": "Données personnelles"
   },
   "Common": {
     "frenchOnly": "Ce contenu n'est disponible qu'en français.",
@@ -198,7 +201,7 @@
     "emptyFiltered": "Aucun document ne correspond à votre recherche. Essayez d'autres mots ou retirez un filtre."
   },
   "PublicationKind": {
-    "RAPPORT_ANNUEL": "Rapport annuel",
+    "RAPPORT_ANNUEL": "Rapport",
     "REFERENTIEL": "Référentiel",
     "GUIDE": "Guide",
     "TEXTE_REGLEMENTAIRE": "Texte réglementaire",
@@ -207,7 +210,7 @@
     "AUTRE": "Autre"
   },
   "PublicationKinds": {
-    "RAPPORT_ANNUEL": "Rapports annuels",
+    "RAPPORT_ANNUEL": "Rapports",
     "REFERENTIEL": "Référentiels",
     "GUIDE": "Guides",
     "TEXTE_REGLEMENTAIRE": "Textes réglementaires",
@@ -293,11 +296,52 @@
     "verify": "Vérifier",
     "submit": "Rechercher",
     "metaTitle": "Recherche",
-    "eyebrow": "Habilitations & accréditations",
-    "title": "Rechercher un établissement ou une formation",
     "institutions": "Établissements ({count})",
     "programmes": "Formations ({count})",
-    "seeAll": "Tout voir →"
+    "seeAll": "Tout voir →",
+    "siteLabel": "Rechercher sur le site",
+    "sitePlaceholder": "Actualité, document, établissement, formation…",
+    "pageTitle": "Rechercher",
+    "open": "Rechercher sur le site",
+    "suggestions": "Suggestions",
+    "loading": "Recherche en cours…",
+    "noSuggestion": "Aucun résultat pour ce texte.",
+    "seeAllSuggestions": "Voir tous les résultats",
+    "results": "{count, plural, =0 {Aucun résultat} one {# résultat} other {# résultats}}",
+    "resultsFor": "pour « {query} »",
+    "resultsTotal": "{count, plural, one {# résultat au total} other {# résultats au total}}",
+    "noResults": "Vérifiez l'orthographe, essayez des mots plus généraux ou élargissez les filtres.",
+    "showAll": "Rechercher dans tous les contenus",
+    "hint": "Saisissez au moins deux caractères : actualités, événements, documents, établissements, formations et pages du site.",
+    "filters": "Filtres de recherche",
+    "filterType": "Type de contenu",
+    "filterPeriod": "Période",
+    "filterCategory": "Rubrique d'actualités",
+    "filterKind": "Type de document",
+    "apply": "Filtrer",
+    "allTypes": "Tous les contenus",
+    "allDates": "Toutes les dates",
+    "lastMonth": "Moins d'un mois",
+    "lastYear": "Moins d'un an",
+    "allCategories": "Toutes les rubriques",
+    "allKinds": "Tous les documents",
+    "filter": {
+      "news": "Actualités",
+      "events": "Événements",
+      "publications": "Documents",
+      "registry": "Habilitations & accréditations",
+      "pages": "Pages du site"
+    },
+    "type": {
+      "news": "Actualité",
+      "events": "Événement",
+      "publications": "Document",
+      "establishments": "Établissement",
+      "programs": "Formation",
+      "pages": "Page"
+    },
+    "pdf": "PDF",
+    "opensInNewTab": "(PDF, nouvel onglet)"
   },
   "Procedures": {
     "factSheet": "Fiche pratique",
@@ -336,5 +380,13 @@
     "title": "Page introuvable",
     "text": "Cette page n'existe pas ou a été déplacée. Les anciennes adresses du site sont redirigées automatiquement ; si vous arrivez ici depuis un lien, recherchez directement :",
     "home": "Retour à l'accueil"
+  },
+  "Legal": {
+    "eyebrow": "Informations légales",
+    "legalNotice": "Mentions légales",
+    "privacy": "Données personnelles",
+    "helpTitle": "Besoin d'aide ?",
+    "helpText": "Une question sur ces informations ou sur vos données personnelles ? L'ANAQ-Sup vous répond.",
+    "contact": "Nous contacter"
   }
 }
