@@ -1,10 +1,11 @@
-import { ChevronDownIcon, MailIcon, MenuIcon, PhoneIcon, SearchIcon } from "lucide-react";
+import { MailIcon, PhoneIcon, SearchIcon } from "lucide-react";
 import { getLocale, getTranslations } from "@/i18n/server";
 
 import { BrandLogo } from "@anaqsup/ui/components/brand-logo";
 
 import { DesktopNav, type ResolvedGroup } from "@/components/layout/DesktopNav";
 import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
+import { MobileMenu } from "@/components/layout/MobileMenu";
 import { SocialLinks } from "@/components/layout/SocialLinks";
 import { getPathname, type Href, Link } from "@/i18n/navigation";
 import { LOCALE_NAMES } from "@/i18n/routing";
@@ -14,8 +15,8 @@ import { site, telHref } from "@/lib/site";
 
 /**
  * En-tête : bandeau supérieur (coordonnées, réseaux sociaux, langue), logotype, menu et loupe de recherche.
- * Le menu large est un petit composant client (sous-menus au survol) ; le menu mobile reste en <details>,
- * fonctionnel sans JavaScript. La loupe mène directement à la page de recherche (choix ANAQ-Sup : aucun panneau
+ * Le menu large est un petit composant client (sous-menus au survol) ; le menu mobile est un tiroir (<details>,
+ * fonctionnel sans JavaScript). La loupe mène directement à la page de recherche (choix ANAQ-Sup : aucun panneau
  * par-dessus la page).
  */
 export async function SiteHeader() {
@@ -80,44 +81,11 @@ export async function SiteHeader() {
             <SearchIcon className="size-[18px]" aria-hidden="true" />
           </Link>
 
-          <details className="group xl:hidden">
-            {/* Icône seule, comme la loupe ; le libellé reste lu par les lecteurs d'écran. */}
-            <summary className="flex size-9.5 shrink-0 cursor-pointer list-none items-center justify-center rounded-control border text-brand-ink transition-colors hover:border-primary hover:bg-muted group-open:border-primary group-open:bg-primary/15 [&::-webkit-details-marker]:hidden">
-              <MenuIcon className="size-[18px]" aria-hidden="true" />
-              <span className="sr-only">{t("menu")}</span>
-            </summary>
-            <nav aria-label={t("mobile")} className="absolute inset-x-0 top-full max-h-[calc(100dvh-8rem)] overflow-y-auto border-b bg-background px-4 py-4 shadow-lg">
-              <ul className="flex flex-col gap-1">
-                {groups.map((group) =>
-                  group.children ? (
-                    <li key={group.id}>
-                      <details className="group/sub">
-                        <summary className="flex cursor-pointer list-none items-center justify-between rounded-control px-3 py-2.5 text-base font-medium hover:bg-muted [&::-webkit-details-marker]:hidden">
-                          {group.label}
-                          <ChevronDownIcon className="size-4 transition-transform group-open/sub:rotate-180" aria-hidden="true" />
-                        </summary>
-                        <ul className="mt-1 mb-2 ml-3 flex flex-col gap-0.5 border-l-2 border-primary/40 pl-3">
-                          {group.children.map((child) => (
-                            <li key={child.href}>
-                              <a href={child.href} className="block rounded-control px-3 py-2 text-[15px] text-muted-foreground hover:bg-muted hover:text-brand-ink">
-                                {child.label}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </details>
-                    </li>
-                  ) : (
-                    <li key={group.id}>
-                      <a href={group.href} className="block rounded-control px-3 py-2.5 text-base font-medium hover:bg-muted">
-                        {group.label}
-                      </a>
-                    </li>
-                  ),
-                )}
-              </ul>
-            </nav>
-          </details>
+          <MobileMenu
+            groups={groups}
+            contact={{ phone: contact.phone, phoneHref: telHref(contact.phone), email: contact.email }}
+            labels={{ menu: t("menu"), close: t("closeMenu"), nav: t("mobile") }}
+          />
         </div>
       </div>
     </header>

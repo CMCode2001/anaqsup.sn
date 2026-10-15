@@ -25,6 +25,7 @@
     "main": "Navigation principale",
     "mobile": "Navigation mobile",
     "menu": "Menu",
+    "closeMenu": "Fermer le menu",
     "homeLink": "{name} — accueil",
     "about": "L'ANAQ-Sup",
     "presentation": "Présentation",
