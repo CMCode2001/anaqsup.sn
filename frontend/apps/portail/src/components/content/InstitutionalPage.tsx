@@ -67,7 +67,7 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
           </figure>
         )}
         {cards ? (
-          // Gouvernance : organigramme des organes ; Missions : grille des missions (intertitres du texte).
+          // Gouvernance : organigramme des organes ; Missions : liste éditoriale des missions (intertitres du texte).
           <div>
             <FrenchOnlyNotice lang={page.lang} className="mb-8" />
             {cards.intro && <RichText html={cards.intro} lang={contentLang} className="mb-10 max-w-4xl" />}
