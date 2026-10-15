@@ -23,7 +23,6 @@ const FALLBACK: SiteSettings = {
     { network: "facebook", url: "https://www.facebook.com/ANAQSup/" },
     { network: "x", url: "https://x.com/ANAQSUP" },
     { network: "linkedin", url: "https://www.linkedin.com/company/anaq-sup/" },
-    { network: "youtube", url: "https://www.youtube.com/channel/UCUFWBm9s_oO1i5-_ihzdWiA" },
   ],
   usefulLinks: [
     { label: "MESRI", description: "Ministère de l'Enseignement supérieur, de la Recherche et de l'Innovation", descriptionEn: "Ministry of Higher Education, Research and Innovation", url: "https://mesrisenegal.sn" },
