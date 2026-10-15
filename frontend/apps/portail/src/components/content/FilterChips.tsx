@@ -9,7 +9,11 @@ export function FilterChips({ label, options, active }: {
   active: string | undefined;
 }) {
   return (
-    <nav aria-label={label} className="flex flex-wrap gap-2">
+    <nav
+      aria-label={label}
+      // Téléphone : une ligne qui défile jusqu'au bord de l'écran (la dernière pastille coupée invite à faire glisser).
+      className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden"
+    >
       {options.map((option) => {
         const current = option.value === active;
         return (
@@ -18,7 +22,7 @@ export function FilterChips({ label, options, active }: {
             href={option.href}
             aria-current={current ? "page" : undefined}
             className={cn(
-              "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+              "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
               current ? "border-primary bg-primary text-primary-foreground" : "bg-background hover:bg-muted",
             )}
           >

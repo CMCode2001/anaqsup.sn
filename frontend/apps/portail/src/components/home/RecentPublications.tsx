@@ -45,8 +45,11 @@ async function Featured({ publication, locale }: { publication: Publication; loc
   const textLang = langAttr(publication.lang, locale);
   const { title, fileUrl, fileType, fileSizeBytes } = publication;
   return (
-    <article className="group flex h-full flex-col gap-6 rounded-2xl bg-white/[0.06] p-5 ring-1 ring-white/10 sm:flex-row sm:items-center md:gap-8 md:p-8">
-      <Page publication={publication} sizes="(min-width: 768px) 240px, 176px" className="aspect-[210/297] w-44 rounded-lg md:w-60" />
+    <article className="group flex h-full flex-col gap-5 rounded-box bg-white/[0.06] p-4 ring-1 ring-white/10 sm:flex-row sm:items-center sm:gap-6 sm:p-5 md:gap-8 md:p-8">
+      {/* Téléphone : la page au centre d'un plateau, plutôt que calée à gauche devant un grand vide. */}
+      <div className="flex justify-center rounded-control bg-white/[0.04] py-5 sm:block sm:rounded-none sm:bg-transparent sm:py-0">
+        <Page publication={publication} sizes="(min-width: 768px) 240px, 160px" className="aspect-[210/297] w-40 rounded-lg sm:w-44 md:w-60" />
+      </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <Meta publication={publication} locale={locale} />
         <h3 lang={textLang} className="mt-3 font-heading text-xl leading-snug font-bold text-white md:text-2xl">{title}</h3>
@@ -59,13 +62,13 @@ async function Featured({ publication, locale }: { publication: Publication; loc
           </p>
         )}
         {fileUrl ? (
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
             <a
               href={fileUrl}
               target="_blank"
               rel="noopener"
               aria-label={t("Resources.consultLabel", { title })}
-              className={`inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 ${FOCUS}`}
+              className={`inline-flex h-11 items-center justify-center gap-2 rounded-control bg-primary px-4 text-sm font-semibold sm:px-6 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 ${FOCUS}`}
             >
               <EyeIcon className="size-4" aria-hidden="true" />{t("Resources.consult")}
             </a>
@@ -73,7 +76,7 @@ async function Featured({ publication, locale }: { publication: Publication; loc
               href={fileUrl}
               download
               aria-label={t("Resources.downloadLabel", { title })}
-              className={`inline-flex h-11 items-center gap-2 rounded-full px-6 text-sm font-semibold text-white ring-1 ring-white/25 transition-colors hover:bg-white/10 hover:ring-white/40 ${FOCUS}`}
+              className={`inline-flex h-11 items-center justify-center gap-2 rounded-control px-4 text-sm font-semibold text-white sm:px-6 ring-1 ring-white/25 transition-colors hover:bg-white/10 hover:ring-white/40 ${FOCUS}`}
             >
               <DownloadIcon className="size-4" aria-hidden="true" />{t("Common.download")}
             </a>
@@ -90,7 +93,7 @@ async function Featured({ publication, locale }: { publication: Publication; loc
 async function Compact({ publication, locale }: { publication: Publication; locale: Locale }) {
   const t = await getTranslations();
   const textLang = langAttr(publication.lang, locale);
-  const card = "group relative flex items-center gap-4 rounded-2xl bg-white/[0.06] p-3 pr-5 ring-1 ring-white/10 transition-colors";
+  const card = "group relative flex items-center gap-4 rounded-box bg-white/[0.06] p-3 pr-5 ring-1 ring-white/10 transition-colors";
   const content = (
     <>
       <Page publication={publication} sizes="80px" className="aspect-[210/297] w-16 rounded-md sm:w-20" />
@@ -130,13 +133,13 @@ export async function RecentPublications({ publications }: { publications: Publi
       <Reveal className="mx-auto max-w-7xl px-4 py-16">
         <div className="relative flex flex-wrap items-end justify-between gap-x-3 border-b border-white/15">
           <h2 id="publications" className="flex items-center gap-3 pb-4 text-2xl font-bold md:text-3xl">
-            <span className="flex size-10 items-center justify-center rounded-full ring-2 ring-white">
+            <span className="flex size-10 items-center justify-center rounded-control ring-2 ring-white">
               <FileTextIcon className="size-5" aria-hidden="true" />
             </span>
             {t("recentPublications")}
           </h2>
           {/* Trait or posé sur le filet, sous le titre (même quand le lien passe à la ligne sur mobile). */}
-          <span aria-hidden="true" className="absolute -bottom-px left-0 h-1 w-20 rounded-full bg-primary" />
+          <span aria-hidden="true" className="absolute -bottom-px left-0 h-1 w-20 rounded-[1px] bg-primary" />
           <Link
             href="/ressources-documentaires/publications"
             className={`mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white transition-colors hover:text-primary ${FOCUS}`}

@@ -66,7 +66,7 @@ export async function SiteFooter() {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-start justify-between gap-3 rounded-2xl px-3 py-2.5 transition duration-200 hover:bg-white/[0.06]"
+                  className="group flex items-start justify-between gap-3 rounded-control px-3 py-2.5 transition duration-200 hover:bg-white/[0.06]"
                 >
                   <span>
                     <span className="block font-semibold text-white">{item.label}</span>
@@ -87,19 +87,19 @@ export async function SiteFooter() {
           <FooterHeading>{t("Footer.contactUs")}</FooterHeading>
           <address className="space-y-4 not-italic">
             <p className="flex gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-primary">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-white/10 text-primary">
                 <MapPinIcon className="size-4" aria-hidden="true" />
               </span>
               <span className="pt-1 leading-relaxed">{contactAddress(settings, locale)}</span>
             </p>
             <p className="flex items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-primary">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-white/10 text-primary">
                 <MailIcon className="size-4" aria-hidden="true" />
               </span>
               <a href={`mailto:${settings.contact.email}`} className="break-all hover:text-white">{settings.contact.email}</a>
             </p>
             <p className="flex items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-primary">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-white/10 text-primary">
                 <PhoneIcon className="size-4" aria-hidden="true" />
               </span>
               <a href={telHref(settings.contact.phone)} className="hover:text-white">{settings.contact.phone}</a>

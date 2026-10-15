@@ -76,6 +76,13 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Arrondis du site (décisions ANAQ-Sup du 15/10/2026) :
+     - box : blocs (cartes, panneaux, images, menus déroulants) ;
+     - control : boutons, champs, listes déroulantes, icônes et avatars ;
+     - pilules (rounded-full) : pastilles, « Lire la suite » du carrousel, retour en haut, barre et filtres de la
+       page de recherche. */
+  --radius-box: 1.5rem;
+  --radius-control: 0.875rem;
 
   /* Magic UI */
   --animate-shiny-text: shiny-text 8s infinite;
@@ -103,7 +110,7 @@
 }
 
 :root {
-  /* Grands arrondis : cartes rounded-2xl/3xl ; boutons, champs et badges en rounded-full. */
+  /* Échelle shadcn (back-office) ; le site public utilise rounded-box (voir --radius-box). */
   --radius: 0.875rem;
 
   --background: oklch(1 0 0);

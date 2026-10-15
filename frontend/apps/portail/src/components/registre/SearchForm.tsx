@@ -44,7 +44,7 @@ export async function SearchForm({ defaultValue = "", variant = "default", scope
         />
       </div>
       {hero ? (
-        <ShimmerButton type="submit" background="var(--primary)" shimmerColor="#ffffff" borderRadius="9999px" className="h-14 px-8 font-semibold text-primary-foreground">
+        <ShimmerButton type="submit" background="var(--primary)" shimmerColor="#ffffff" borderRadius="0.875rem" className="h-14 px-8 font-semibold text-primary-foreground">
           {t("verify")}
         </ShimmerButton>
       ) : (

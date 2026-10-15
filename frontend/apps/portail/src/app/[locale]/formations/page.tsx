@@ -68,7 +68,7 @@ export default async function FormationsPage({ searchParams }: Props) {
             <Pagination pathname="/formations" params={{ ...keep, avis, niveau: level }} page={pageNumber} totalPages={result.page.totalPages} />
           </>
         ) : (
-          <p className="rounded-3xl bg-muted p-6">{t("Programmes.empty")}</p>
+          <p className="rounded-box bg-muted p-6">{t("Programmes.empty")}</p>
         )}
       </div>
     </>

@@ -11,7 +11,7 @@ export async function FrenchOnlyNotice({ lang, className }: { lang: Lang | undef
   if (!langAttr(lang, locale)) return null;
   return (
     <p role="note" className={className}>
-      <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-muted px-4 py-2 text-sm font-medium text-brand-ink">
+      <span className="inline-flex items-center gap-2 rounded-control border border-primary/40 bg-muted px-4 py-2 text-sm font-medium text-brand-ink">
         <LanguagesIcon className="size-4" aria-hidden="true" />
         {t("frenchOnly")}
       </span>

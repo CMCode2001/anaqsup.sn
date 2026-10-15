@@ -33,15 +33,15 @@ export default async function HabilitationsAccreditationsPage() {
         <ul className="grid gap-6 md:grid-cols-2">
           {entries.map(({ href, Icon, title, text, cta }) => (
             <li key={href}>
-              <Link href={href} className="group block h-full rounded-3xl focus-visible:outline-none">
+              <Link href={href} className="group block h-full rounded-box focus-visible:outline-none">
                 <Card className="h-full transition-all duration-300 ease-out group-hover:scale-[1.03] group-hover:shadow-xl">
                   <CardHeader>
-                    <span className="mb-4 grid size-14 place-items-center rounded-full bg-primary text-primary-foreground">
+                    <span className="mb-4 grid size-14 place-items-center rounded-control bg-primary text-primary-foreground">
                       <Icon className="size-6" aria-hidden="true" />
                     </span>
                     <CardTitle className="font-heading text-xl text-brand-ink">{title}</CardTitle>
                     <CardDescription className="mt-2 text-base">{text}</CardDescription>
-                    <span className="mt-4 inline-flex rounded-full bg-muted px-4 py-2 text-sm font-semibold text-brand-ink">{cta} →</span>
+                    <span className="mt-4 inline-flex rounded-control bg-muted px-4 py-2 text-sm font-semibold text-brand-ink">{cta} →</span>
                   </CardHeader>
                 </Card>
               </Link>
@@ -52,14 +52,14 @@ export default async function HabilitationsAccreditationsPage() {
         <section aria-labelledby="lire-avis" className="mt-14">
           <h2 id="lire-avis" className="text-2xl font-bold text-brand-ink">{t("howToRead")}</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="flex gap-4 rounded-3xl bg-status-ok-surface p-6">
+            <div className="flex gap-4 rounded-box bg-status-ok-surface p-6">
               <CircleCheckIcon className="size-7 shrink-0 text-status-ok" aria-hidden="true" />
               <div>
                 <p className="font-semibold text-status-ok">{t("favourable")}</p>
                 <p className="mt-1 text-sm">{t("favourableText")}</p>
               </div>
             </div>
-            <div className="flex gap-4 rounded-3xl bg-status-stop-surface p-6">
+            <div className="flex gap-4 rounded-box bg-status-stop-surface p-6">
               <CircleXIcon className="size-7 shrink-0 text-status-stop" aria-hidden="true" />
               <div>
                 <p className="font-semibold text-status-stop">{t("unfavourable")}</p>
@@ -82,7 +82,7 @@ export default async function HabilitationsAccreditationsPage() {
               { href: "/procedures/accreditation", label: t("accreditationProcedure") },
             ] as const).map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="flex items-center gap-3 rounded-full border bg-card px-6 py-4 font-semibold text-brand-ink transition-all hover:scale-[1.02] hover:shadow-md">
+                <Link href={item.href} className="flex items-center gap-3 rounded-control border bg-card px-6 py-4 font-semibold text-brand-ink transition-all hover:scale-[1.02] hover:shadow-md">
                   <ScrollTextIcon className="size-5" aria-hidden="true" /> {item.label}
                 </Link>
               </li>

@@ -41,7 +41,7 @@ export function LocaleSwitcher({ locale, label }: { locale: Locale; label: strin
         aria-controls="langues"
         aria-label={label}
         onClick={() => setOpen(!open)}
-        className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="inline-flex h-8 items-center gap-1.5 rounded-control px-2.5 font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <GlobeIcon className="size-4 text-primary" aria-hidden="true" />
         <span className="hidden sm:inline">{LOCALE_NAMES[locale]}</span>
@@ -52,7 +52,7 @@ export function LocaleSwitcher({ locale, label }: { locale: Locale; label: strin
         id="langues"
         data-nav-panel
         className={cx(
-          "absolute top-full right-0 z-50 mt-2 w-40 rounded-2xl border bg-background p-1.5 text-foreground shadow-xl transition duration-200 ease-out",
+          "absolute top-full right-0 z-50 mt-2 w-40 rounded-box border bg-background p-1.5 text-foreground shadow-xl transition duration-200 ease-out",
           open ? "visible translate-y-0 opacity-100" : "pointer-events-none invisible -translate-y-1 opacity-0",
         )}
       >
@@ -63,7 +63,7 @@ export function LocaleSwitcher({ locale, label }: { locale: Locale; label: strin
               hrefLang={target}
               lang={target}
               aria-current={target === locale ? "true" : undefined}
-              className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium hover:bg-muted aria-[current=true]:text-brand-ink"
+              className="flex items-center justify-between rounded-control px-3 py-2 text-sm font-medium hover:bg-muted aria-[current=true]:text-brand-ink"
             >
               {LOCALE_NAMES[target]}
               {target === locale && <CheckIcon className="size-4 text-primary" aria-hidden="true" />}

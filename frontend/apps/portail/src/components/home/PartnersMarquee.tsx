@@ -18,7 +18,7 @@ function PartnerCard({ partner, hidden, newTab }: { partner: Partner; hidden: bo
     // En attendant le logo officiel : le nom, sobrement.
     <span className="text-xl font-extrabold tracking-wide text-brand-ink">{partner.name}</span>
   );
-  const className = "group flex h-24 w-56 shrink-0 items-center justify-center rounded-2xl border bg-background px-6 shadow-xs transition hover:border-primary hover:shadow-md";
+  const className = "group flex h-24 w-56 shrink-0 items-center justify-center rounded-box border bg-background px-6 shadow-xs transition hover:border-primary hover:shadow-md";
   return partner.url ? (
     <a href={partner.url} target="_blank" rel="noopener noreferrer" tabIndex={hidden ? -1 : undefined} className={className} title={partner.name}>
       {content}
@@ -41,7 +41,7 @@ export async function PartnersMarquee({ partners }: { partners: Partner[] }) {
       <div className="mx-auto max-w-7xl px-4 pt-14">
         <h2 id="partenaires" className="inline-block text-2xl font-extrabold text-brand-ink md:text-3xl">
           {t("Home.partners")}
-          <span aria-hidden="true" className="mt-2 block h-1 w-16 rounded-full bg-primary" />
+          <span aria-hidden="true" className="mt-2 block h-1 w-16 rounded-[1px] bg-primary" />
         </h2>
         <p className="mt-3 text-muted-foreground">{await intro("Home.partnersLead")}</p>
       </div>

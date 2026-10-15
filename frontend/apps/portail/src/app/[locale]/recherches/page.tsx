@@ -85,28 +85,33 @@ export default async function RecherchePage({ searchParams }: Props) {
 
           <AutoSubmitForm key={formKey} action={action} role="search" aria-label={t("Search.filters")} className="mt-6 md:mt-8">
             <div className="relative">
-              <label htmlFor="search-page-q" className="sr-only">{t("Search.siteLabel")}</label>
-              <SearchIcon className="pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-              <input
-                id="search-page-q"
-                name="q"
-                type="search"
-                required
-                minLength={2}
-                maxLength={100}
-                defaultValue={q}
-                placeholder={t("Search.sitePlaceholder")}
-                autoComplete="off"
-                // Arrivée par la loupe du menu : on peut taper tout de suite.
-                autoFocus={!q}
-                className="h-14 w-full rounded-full border-4 border-white/15 bg-background bg-clip-padding pr-36 pl-13 text-base text-foreground shadow-lg outline-none placeholder:text-muted-foreground focus-visible:border-primary/60 md:h-16 md:pr-44 md:text-lg [&::-webkit-search-cancel-button]:hidden"
-              />
-              <button
-                type="submit"
-                className="absolute inset-y-2 right-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none md:px-8 md:text-base"
-              >
-                {t("Search.submit")}
-              </button>
+              {/* Barre en pilule (exception voulue par l'ANAQ-Sup à la règle « jamais de pilule ») : loupe, champ, bouton. */}
+              <div className="flex items-center gap-2 rounded-full bg-background p-1.5 pl-5 shadow-xl shadow-black/25 ring-1 ring-white/10 transition-shadow focus-within:ring-4 focus-within:ring-primary/45 md:gap-3 md:p-2 md:pl-6">
+                <label htmlFor="search-page-q" className="sr-only">{t("Search.siteLabel")}</label>
+                <SearchIcon className="hidden size-6 shrink-0 text-muted-foreground md:block" aria-hidden="true" />
+                <input
+                  id="search-page-q"
+                  name="q"
+                  type="search"
+                  required
+                  minLength={2}
+                  maxLength={100}
+                  defaultValue={q}
+                  placeholder={t("Search.sitePlaceholder")}
+                  autoComplete="off"
+                  // Arrivée par la loupe du menu : on peut taper tout de suite.
+                  autoFocus={!q}
+                  className="h-11 min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground md:h-12 md:text-lg [&::-webkit-search-cancel-button]:hidden"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex size-11 shrink-0 items-center justify-center gap-2 rounded-full bg-primary font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:h-12 md:w-auto md:px-8 md:text-lg"
+                >
+                  {/* Téléphone et petite tablette : loupe seule, pour laisser la place au texte saisi. */}
+                  <SearchIcon className="size-5 md:hidden" aria-hidden="true" />
+                  <span className="sr-only md:not-sr-only">{t("Search.submit")}</span>
+                </button>
+              </div>
               <LiveSuggestions
                 inputId="search-page-q"
                 lang={locale}
@@ -120,12 +125,12 @@ export default async function RecherchePage({ searchParams }: Props) {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-3 text-foreground [&>*]:w-full sm:[&>*]:w-auto sm:[&>*]:min-w-56">
-              <NativeSelect id="search-type" name="type" label={t("Search.filterType")} defaultValue={type ?? ""}>
+              <NativeSelect pill id="search-type" name="type" label={t("Search.filterType")} defaultValue={type ?? ""}>
                 <option value="">{t("Search.allTypes")}</option>
                 {TYPES.map((value) => <option key={value} value={value}>{t(`Search.filter.${value}`)}</option>)}
               </NativeSelect>
               {dated && (
-                <NativeSelect id="search-period" name="period" label={t("Search.filterPeriod")} defaultValue={period ?? ""}>
+                <NativeSelect pill id="search-period" name="period" label={t("Search.filterPeriod")} defaultValue={period ?? ""}>
                   <option value="">{t("Search.allDates")}</option>
                   <option value="month">{t("Search.lastMonth")}</option>
                   <option value="year">{t("Search.lastYear")}</option>
@@ -133,13 +138,13 @@ export default async function RecherchePage({ searchParams }: Props) {
                 </NativeSelect>
               )}
               {type === "news" && (
-                <NativeSelect id="search-category" name="category" label={t("Search.filterCategory")} defaultValue={category ?? ""}>
+                <NativeSelect pill id="search-category" name="category" label={t("Search.filterCategory")} defaultValue={category ?? ""}>
                   <option value="">{t("Search.allCategories")}</option>
                   {(categories ?? []).map((c) => <option key={c.slug} value={c.slug}>{c.label}</option>)}
                 </NativeSelect>
               )}
               {type === "publications" && (
-                <NativeSelect id="search-kind" name="kind" label={t("Search.filterKind")} defaultValue={kind ?? ""}>
+                <NativeSelect pill id="search-kind" name="kind" label={t("Search.filterKind")} defaultValue={kind ?? ""}>
                   <option value="">{t("Search.allKinds")}</option>
                   {KINDS.map((value) => <option key={value} value={value}>{t(`PublicationKinds.${value}`)}</option>)}
                 </NativeSelect>
@@ -165,8 +170,8 @@ export default async function RecherchePage({ searchParams }: Props) {
               </p>
 
               {total === 0 && (
-                <div className="mt-6 flex flex-col items-start gap-4 rounded-3xl border bg-card p-6 shadow-sm sm:flex-row sm:items-center">
-                  <span className="grid size-12 shrink-0 place-items-center rounded-full bg-muted text-brand-ink">
+                <div className="mt-6 flex flex-col items-start gap-4 rounded-box border bg-card p-6 shadow-sm sm:flex-row sm:items-center">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-control bg-muted text-brand-ink">
                     <SearchXIcon className="size-6" aria-hidden="true" />
                   </span>
                   <p className="flex-1 text-muted-foreground">{t("Search.noResults")}</p>

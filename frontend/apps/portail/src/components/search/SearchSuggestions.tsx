@@ -143,7 +143,7 @@ export default function SearchSuggestions({ inputId, lang, labels }: { inputId: 
     <>
       <p role="status" className="sr-only">{status}</p>
       {visible && (
-        <div ref={containerRef} className="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-3xl border bg-card text-foreground shadow-xl">
+        <div ref={containerRef} className="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-box border bg-card text-foreground shadow-xl">
           {items.length > 0 ? (
             <ul id={listId} role="listbox" aria-label={labels.suggestions} className={cx("divide-y transition-opacity", state.status === "loading" && "opacity-60")}>
               {items.map((item, index) => {
@@ -163,7 +163,7 @@ export default function SearchSuggestions({ inputId, lang, labels }: { inputId: 
                       onClick={() => setDismissed(true)}
                       className={cx("flex items-center gap-4 px-5 py-3 transition-colors", index === active && "bg-muted")}
                     >
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-brand-ink">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-control bg-primary/15 text-brand-ink">
                         <Icon className="size-[18px]" aria-hidden="true" />
                       </span>
                       <span className="min-w-0 flex-1">

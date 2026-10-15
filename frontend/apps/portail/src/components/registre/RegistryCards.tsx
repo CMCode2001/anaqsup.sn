@@ -17,11 +17,11 @@ export async function EstablishmentCard({ establishment }: { establishment: Esta
   const locale = await getLocale();
   const t = await getTranslations("Institutions");
   return (
-    <Link href={{ pathname: "/etablissements/[slug]", params: { slug: establishment.slug } }} className="group block h-full rounded-3xl focus-visible:outline-none">
+    <Link href={{ pathname: "/etablissements/[slug]", params: { slug: establishment.slug } }} className="group block h-full rounded-box focus-visible:outline-none">
       <Card className={ZOOM}>
         <CardContent className="flex h-full flex-col gap-4">
           <div className="flex items-start gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-muted text-brand-ink">
+            <span className="grid size-11 shrink-0 place-items-center rounded-control bg-muted text-brand-ink">
               <Building2Icon className="size-5" aria-hidden="true" />
             </span>
             <div>
@@ -45,11 +45,11 @@ export async function ProgramCard({ program }: { program: ProgramSummary }) {
   const locale = await getLocale();
   const t = await getTranslations("Level");
   return (
-    <Link href={{ pathname: "/formations/[slug]", params: { slug: program.slug } }} className="group block h-full rounded-3xl focus-visible:outline-none">
+    <Link href={{ pathname: "/formations/[slug]", params: { slug: program.slug } }} className="group block h-full rounded-box focus-visible:outline-none">
       <Card className={ZOOM}>
         <CardContent className="flex h-full flex-col gap-4">
           <div className="flex items-start gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-muted text-brand-ink">
+            <span className="grid size-11 shrink-0 place-items-center rounded-control bg-muted text-brand-ink">
               <GraduationCapIcon className="size-5" aria-hidden="true" />
             </span>
             <div>

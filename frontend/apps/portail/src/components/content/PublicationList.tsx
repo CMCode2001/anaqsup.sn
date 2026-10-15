@@ -97,7 +97,7 @@ export async function PublicationList({ pathname, title, lead, kind, searchParam
           role="search"
           aria-label={t("Resources.filters")}
           className={cn(
-            "grid gap-3 rounded-3xl border bg-card p-4 shadow-sm",
+            "grid gap-3 rounded-box border bg-card p-4 shadow-sm",
             kind ? "md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto]" : "md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]",
           )}
         >
@@ -113,23 +113,23 @@ export async function PublicationList({ pathname, title, lead, kind, searchParam
               defaultValue={q}
               placeholder={t("Resources.searchPlaceholder")}
               autoComplete="off"
-              className="h-12 bg-background pl-12 text-base"
+              className="h-12 rounded-full! bg-background pl-12 text-base"
             />
           </div>
           {!kind && (
-            <NativeSelect id="document-type" name="type" label={t("Resources.category")} defaultValue={type ?? ""}>
+            <NativeSelect pill id="document-type" name="type" label={t("Resources.category")} defaultValue={type ?? ""}>
               <option value="">{t("Resources.allCategories")}</option>
               {KINDS.map((value) => <option key={value} value={value}>{t(`PublicationKinds.${value}`)}</option>)}
             </NativeSelect>
           )}
-          <NativeSelect id="document-year" name="year" label={t("Resources.year")} defaultValue={year ? String(year) : ""}>
+          <NativeSelect pill id="document-year" name="year" label={t("Resources.year")} defaultValue={year ? String(year) : ""}>
             <option value="">{t("Resources.allYears")}</option>
             {/* L'année filtrée reste proposée même si aucun document de la catégorie choisie n'en porte. */}
             {[...new Set([...(years ?? []), ...(year ? [year] : [])])].sort((a, b) => b - a).map((value) => (
               <option key={value} value={value}>{value}</option>
             ))}
           </NativeSelect>
-          <Button type="submit" size="lg" className="h-12">{t("Resources.submit")}</Button>
+          <Button type="submit" size="lg" className="h-12 rounded-full!">{t("Resources.submit")}</Button>
         </AutoSubmitForm>
 
         {chips.length > 0 && (
@@ -211,7 +211,7 @@ export async function PublicationList({ pathname, title, lead, kind, searchParam
             />
           </>
         ) : (
-          <p className="mt-6 rounded-3xl bg-muted p-6">{chips.length > 0 ? t("Resources.emptyFiltered") : t("Resources.empty")}</p>
+          <p className="mt-6 rounded-box bg-muted p-6">{chips.length > 0 ? t("Resources.emptyFiltered") : t("Resources.empty")}</p>
         )}
       </div>
     </>

@@ -48,7 +48,7 @@ export default async function EvenementPage({ params }: Props) {
       </Button>
       <h1 lang={contentLang} className="mt-6 text-3xl font-extrabold leading-tight text-brand-ink md:text-4xl">{event.title}</h1>
       <FrenchOnlyNotice lang={event.lang} className="mt-6" />
-      <div className="mt-6 grid gap-3 rounded-3xl bg-muted p-6 sm:grid-cols-2">
+      <div className="mt-6 grid gap-3 rounded-box bg-muted p-6 sm:grid-cols-2">
         <p className="flex items-start gap-2">
           <CalendarIcon className="mt-0.5 size-5 shrink-0 text-brand-ink" aria-hidden="true" />
           <span>
@@ -65,7 +65,7 @@ export default async function EvenementPage({ params }: Props) {
           <p className="flex items-start gap-2"><MapPinIcon className="mt-0.5 size-5 shrink-0 text-brand-ink" aria-hidden="true" />{event.location}</p>
         )}
       </div>
-      <div className="mt-8 rounded-3xl border bg-card p-6 shadow-sm md:p-10">
+      <div className="mt-8 rounded-box border bg-card p-6 shadow-sm md:p-10">
         <RichText html={event.bodyHtml} lang={contentLang} />
       </div>
     </article>

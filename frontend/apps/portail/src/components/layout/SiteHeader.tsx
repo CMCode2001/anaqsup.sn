@@ -41,15 +41,15 @@ export async function SiteHeader() {
       {/* Bandeau supérieur : coordonnées à gauche ; réseaux sociaux puis langue à droite. */}
       <div className="bg-anthracite text-[13px] text-white/90">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-1.5">
-          <ul className="flex items-center gap-x-4 sm:gap-x-8">
+          <ul className="flex items-center gap-x-2 sm:gap-x-8">
             <li>
-              <a href={telHref(contact.phone)} className="inline-flex items-center gap-2 font-medium hover:text-primary">
+              <a href={telHref(contact.phone)} className="inline-flex min-h-8 min-w-8 items-center justify-center gap-2 font-medium hover:text-primary sm:justify-start">
                 <PhoneIcon className="size-4 text-primary" aria-hidden="true" />
                 <span className="sr-only sm:not-sr-only">{contact.phone}</span>
               </a>
             </li>
             <li>
-              <a href={`mailto:${contact.email}`} className="inline-flex items-center gap-2 font-medium hover:text-primary">
+              <a href={`mailto:${contact.email}`} className="inline-flex min-h-8 min-w-8 items-center justify-center gap-2 font-medium hover:text-primary sm:justify-start">
                 <MailIcon className="size-4 text-primary" aria-hidden="true" />
                 <span className="sr-only sm:not-sr-only">{contact.email}</span>
               </a>
@@ -75,14 +75,16 @@ export async function SiteHeader() {
           <Link
             href="/recherches"
             aria-label={tSearch("open")}
-            className="flex size-9.5 shrink-0 items-center justify-center rounded-full border text-brand-ink transition-colors hover:border-primary hover:bg-muted"
+            className="flex size-9.5 shrink-0 items-center justify-center rounded-control border text-brand-ink transition-colors hover:border-primary hover:bg-muted"
           >
             <SearchIcon className="size-[18px]" aria-hidden="true" />
           </Link>
 
           <details className="group xl:hidden">
-            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium [&::-webkit-details-marker]:hidden">
-              <MenuIcon className="size-4" aria-hidden="true" /> {t("menu")}
+            {/* Icône seule, comme la loupe ; le libellé reste lu par les lecteurs d'écran. */}
+            <summary className="flex size-9.5 shrink-0 cursor-pointer list-none items-center justify-center rounded-control border text-brand-ink transition-colors hover:border-primary hover:bg-muted group-open:border-primary group-open:bg-primary/15 [&::-webkit-details-marker]:hidden">
+              <MenuIcon className="size-[18px]" aria-hidden="true" />
+              <span className="sr-only">{t("menu")}</span>
             </summary>
             <nav aria-label={t("mobile")} className="absolute inset-x-0 top-full max-h-[calc(100dvh-8rem)] overflow-y-auto border-b bg-background px-4 py-4 shadow-lg">
               <ul className="flex flex-col gap-1">
@@ -90,14 +92,14 @@ export async function SiteHeader() {
                   group.children ? (
                     <li key={group.id}>
                       <details className="group/sub">
-                        <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl px-3 py-2.5 text-base font-medium hover:bg-muted [&::-webkit-details-marker]:hidden">
+                        <summary className="flex cursor-pointer list-none items-center justify-between rounded-control px-3 py-2.5 text-base font-medium hover:bg-muted [&::-webkit-details-marker]:hidden">
                           {group.label}
                           <ChevronDownIcon className="size-4 transition-transform group-open/sub:rotate-180" aria-hidden="true" />
                         </summary>
                         <ul className="mt-1 mb-2 ml-3 flex flex-col gap-0.5 border-l-2 border-primary/40 pl-3">
                           {group.children.map((child) => (
                             <li key={child.href}>
-                              <a href={child.href} className="block rounded-xl px-3 py-2 text-[15px] text-muted-foreground hover:bg-muted hover:text-brand-ink">
+                              <a href={child.href} className="block rounded-control px-3 py-2 text-[15px] text-muted-foreground hover:bg-muted hover:text-brand-ink">
                                 {child.label}
                               </a>
                             </li>
@@ -107,7 +109,7 @@ export async function SiteHeader() {
                     </li>
                   ) : (
                     <li key={group.id}>
-                      <a href={group.href} className="block rounded-2xl px-3 py-2.5 text-base font-medium hover:bg-muted">
+                      <a href={group.href} className="block rounded-control px-3 py-2.5 text-base font-medium hover:bg-muted">
                         {group.label}
                       </a>
                     </li>

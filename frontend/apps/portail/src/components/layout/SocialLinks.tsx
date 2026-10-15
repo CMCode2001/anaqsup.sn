@@ -8,7 +8,7 @@ import { site } from "@/lib/site";
 
 const VARIANTS = {
   // Bandeau supérieur : pastilles blanches, glyphe anthracite (modèle fourni par l'ANAQ-Sup).
-  topbar: "size-7 bg-white text-anthracite hover:bg-primary [&_svg]:size-3.5",
+  topbar: "size-8 bg-white text-anthracite hover:bg-primary [&_svg]:size-3.5",
   // Pied de page : pastilles translucides qui passent à l'or au survol.
   footer: "size-10 bg-white/10 text-white ring-1 ring-white/15 hover:bg-primary hover:text-primary-foreground hover:ring-primary [&_svg]:size-4",
 } as const;
@@ -26,7 +26,7 @@ export async function SocialLinks({ variant, className }: { variant: keyof typeo
             rel="noopener noreferrer"
             title={NETWORK_LABELS[item.network]}
             className={cn(
-              "inline-flex items-center justify-center rounded-full transition duration-200 hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+              "inline-flex items-center justify-center rounded-control transition duration-200 hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
               VARIANTS[variant],
             )}
           >

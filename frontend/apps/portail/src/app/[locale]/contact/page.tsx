@@ -32,7 +32,7 @@ export default async function ContactPage() {
             <li key={label}>
               <Card className="h-full transition-all duration-300 hover:scale-[1.03] hover:shadow-xl">
                 <CardContent>
-                  <span className="grid size-12 place-items-center rounded-full bg-primary text-primary-foreground">
+                  <span className="grid size-12 place-items-center rounded-control bg-primary text-primary-foreground">
                     <Icon className="size-5" aria-hidden="true" />
                   </span>
                   <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>

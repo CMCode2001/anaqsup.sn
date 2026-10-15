@@ -64,7 +64,7 @@ export async function NewsList({ pathname, title, category, searchParams }: {
       <section aria-labelledby="autres" className="mt-12">
         <h2 id="autres" className="inline-block text-2xl font-extrabold text-brand-ink md:text-3xl">
           {featured ? t("News.others") : title}
-          <span aria-hidden="true" className="mt-2 block h-1 w-16 rounded-full bg-primary" />
+          <span aria-hidden="true" className="mt-2 block h-1 w-16 rounded-[1px] bg-primary" />
         </h2>
         {others.length > 0 ? (
           <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">

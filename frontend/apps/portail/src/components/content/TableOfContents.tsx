@@ -22,7 +22,7 @@ export function withAnchors(html: string, { numbered = false }: { numbered?: boo
 export function TableOfContents({ label, items, lang }: { label: string; items: Heading[]; lang?: string }) {
   if (items.length === 0) return null;
   return (
-    <nav aria-label={label} lang={lang} className="mt-8 rounded-xl border bg-muted p-5 print:hidden">
+    <nav aria-label={label} lang={lang} className="mt-8 rounded-box border bg-muted p-5 print:hidden">
       <ol className="list-decimal space-y-1 pl-5 text-sm">
         {items.map((item) => <li key={item.id}><a href={`#${item.id}`}>{item.text}</a></li>)}
       </ol>
