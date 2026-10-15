@@ -10,7 +10,7 @@ import { routing } from "@/i18n/routing";
 export default createMiddleware(routing);
 
 export const config = {
-  // Ni l'API interne, ni les fichiers Next.js, ni les images téléversées (/media/…), ni les fichiers
-  // statiques (tout chemin avec une extension).
-  matcher: "/((?!api|_next|_vercel|media/|.*\\..*).*)",
+  // Ni l'API interne, ni les fichiers Next.js, ni les images téléversées (/media/…), ni l'icône iPhone générée
+  // (/apple-icon, sans extension), ni les fichiers statiques (tout chemin avec une extension).
+  matcher: "/((?!api|_next|_vercel|media/|apple-icon|.*\\..*).*)",
 };

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Favicon : drapeau du Sénégal (couleurs de public/brand/drapeau.svg), en carré pour rester lisible à 16 px. -->
+  <clipPath id="coins"><rect width="32" height="32" rx="4"/></clipPath>
+  <g clip-path="url(#coins)">
+    <rect width="10.67" height="32" fill="#109939"/>
+    <rect x="10.67" width="10.66" height="32" fill="#FFE500"/>
+    <rect x="21.33" width="10.67" height="32" fill="#DE2627"/>
+  </g>
+  <polygon fill="#109939" points="16.00,11.00 17.26,14.87 21.33,14.87 18.03,17.26 19.29,21.13 16.00,18.74 12.71,21.13 13.97,17.26 10.67,14.87 14.74,14.87"/>
+</svg>
