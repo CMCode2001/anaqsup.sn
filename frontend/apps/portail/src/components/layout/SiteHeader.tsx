@@ -40,8 +40,8 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 border-b bg-background print:hidden">
       {/* Bandeau supérieur : coordonnées à gauche ; réseaux sociaux puis langue à droite. */}
       <div className="bg-anthracite text-[13px] text-white/90">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-1.5">
-          <ul className="flex items-center gap-x-2 sm:gap-x-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-1.5 sm:gap-4">
+          <ul className="flex items-center sm:gap-x-8">
             <li>
               <a href={telHref(contact.phone)} className="inline-flex min-h-8 min-w-8 items-center justify-center gap-2 font-medium hover:text-primary sm:justify-start">
                 <PhoneIcon className="size-4 text-primary" aria-hidden="true" />
@@ -55,7 +55,7 @@ export async function SiteHeader() {
               </a>
             </li>
           </ul>
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <SocialLinks variant="topbar" />
             <span aria-hidden="true" className="h-4 w-px bg-white/20" />
             <LocaleSwitcher locale={locale} label={tTop("chooseLanguage", { language: LOCALE_NAMES[locale] })} />
