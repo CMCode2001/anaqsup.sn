@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { CoverImage } from "@/components/content/CoverImage";
 import { FrenchOnlyNotice } from "@/components/content/FrenchOnlyNotice";
+import { GovernanceCards, splitSections } from "@/components/content/GovernanceCards";
 import { PageHeader } from "@/components/content/PageHeader";
 import { PersonCaption } from "@/components/content/PersonCaption";
 import { RichText } from "@/components/content/RichText";
@@ -39,6 +40,9 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
   const page = await api.page(slug, lang);
   if (!page) notFound();
   const contentLang = langAttr(page.lang, lang);
+  // Gouvernance (choix ANAQ-Sup) : cartes des organes dès que le texte compte au moins deux intertitres.
+  const split = slug === "gouvernance" ? splitSections(page.bodyHtml) : null;
+  const governance = split && split.sections.length >= 2 ? split : null;
 
   return (
     <>
@@ -60,7 +64,18 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
             <PersonCaption name={page.imageName} role={page.imageRole} size="md" />
           </figure>
         )}
-        {/* Aligné sur l'en-tête de la page ; ligne de lecture confortable. */}
+        {governance ? (
+          // Gouvernance : une carte par organe (intertitres du texte), sur toute la largeur.
+          <div>
+            <FrenchOnlyNotice lang={page.lang} className="mb-8" />
+            {governance.intro && <RichText html={governance.intro} lang={contentLang} className="mb-10 max-w-4xl" />}
+            <GovernanceCards sections={governance.sections} lang={contentLang} />
+            <p className="mt-10 text-xs text-muted-foreground">
+              {t("Common.updatedOn", { date: formatDate(page.updatedAt, lang) })}
+            </p>
+          </div>
+        ) : (
+        /* Aligné sur l'en-tête de la page ; ligne de lecture confortable. */
         <div className="max-w-4xl">
           <FrenchOnlyNotice lang={page.lang} className="mb-8" />
           <RichText html={page.bodyHtml} lang={contentLang} />
@@ -68,6 +83,7 @@ export async function InstitutionalPageView({ slug }: { slug: Slug }) {
             {t("Common.updatedOn", { date: formatDate(page.updatedAt, lang) })}
           </p>
         </div>
+        )}
       </article>
       )}
     </>
