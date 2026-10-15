@@ -20,6 +20,7 @@ import sn.anaqsup.portail.content.persistence.TranslationRepository.Type;
  * Pages légales créées par la migration V15 (décision ANAQ-Sup du 14/10/2026) : publiées en français et en
  * anglais, la version anglaise étant tenue pour une traduction automatique à jour (DeepL ne la refait que si le
  * français change). V16 : plus de YouTube (chaîne supprimée), ni dans les réseaux sociaux ni dans le texte.
+ * V17 : page « Gouvernance » au texte officiel de l'ancien site, créée là où elle n'existait pas (production).
  * Contexte propre (propriété dédiée) : base fraîchement migrée, que les autres tests ne vident pas.
  */
 @SpringBootTest(properties = "anaqsup.test.contexte=pages-legales")
@@ -59,6 +60,21 @@ class LegalPagesIT {
         assertThat(english).bodyJson().extractingPath("$.title").isEqualTo("Personal data and cookies");
         assertThat(english).bodyJson().extractingPath("$.bodyHtml").asString()
                 .doesNotContain("management area", "ANAQSUP_SESSION", "XSRF", "password", "YouTube");
+    }
+
+    @Test
+    void pageGouvernanceOfficielle() {
+        assertThat(mvc.get().uri("/api/v1/public/pages/gouvernance")).hasStatusOk()
+                .bodyJson().isLenientlyEqualTo("""
+                        {"title": "Gouvernance de l'ANAQ-Sup", "lang": "fr"}""");
+        assertThat(mvc.get().uri("/api/v1/public/pages/gouvernance")).bodyJson().extractingPath("$.bodyHtml").asString()
+                .contains("<h2>Le Conseil d’administration</h2>", "<h2>Le Conseil scientifique</h2>", "<h2>Le Secrétariat exécutif</h2>", "RAFANAQ",
+                        "Les membres du Conseil scientifique sont", "Secrétaire exécutif nommé par décret", "la recherche et l’innovation.")
+                .doesNotContain("démonstration", "nommée", "et de l’innovation");
+        assertThat(mvc.get().uri("/api/v1/public/pages/gouvernance?lang=en")).bodyJson()
+                .isLenientlyEqualTo("""
+                        {"title": "Governance of ANAQ-Sup", "lang": "en"}""");
+        assertThat(translations.pending(Type.PAGE, 100, 12)).noneMatch(page -> page.slug().equals("gouvernance"));
     }
 
     @Test
