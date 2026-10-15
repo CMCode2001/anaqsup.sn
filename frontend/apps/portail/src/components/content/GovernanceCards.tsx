@@ -35,14 +35,17 @@ function Body({ html, className }: { html: string; className: string }) {
   return <div className={`[&_a]:font-medium [&_a]:underline [&_a]:underline-offset-4 [&_p+p]:mt-3 ${className}`} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-function OrgCard({ section, index, className = "" }: { section: Section; index: number; className?: string }) {
+/** Trait or du téléphone : relie le médaillon de la carte à la carte précédente (colonne vertébrale). */
+const SPINE = "before:absolute before:-top-12 before:left-[calc(1.25rem+1.5rem-1px)] before:h-6 before:w-0.5 before:bg-primary md:before:hidden";
+
+function OrgCard({ section, index, connected = false }: { section: Section; index: number; connected?: boolean }) {
   const id = `organe-${index + 1}`;
   return (
-    <section aria-labelledby={id} className={`group relative rounded-box bg-card px-7 pt-12 pb-8 shadow-[0_30px_70px_-35px_rgb(0_0_0/0.35)] ring-1 ring-foreground/5 transition duration-500 ease-out hover:-translate-y-1 hover:ring-primary/40 md:px-9 ${className}`}>
-      <span className="absolute -top-7 left-7 flex size-14 items-center justify-center rounded-control bg-anthracite text-primary shadow-lg ring-4 ring-background md:left-9">
-        <OrganIcon title={section.title} className="size-7" />
+    <section aria-labelledby={id} className={`group relative rounded-box bg-card px-5 pt-11 pb-7 shadow-[0_30px_70px_-35px_rgb(0_0_0/0.35)] ring-1 ring-foreground/5 transition duration-500 ease-out hover:-translate-y-1 hover:ring-primary/40 md:px-6 md:pt-12 md:pb-8 lg:px-9 ${connected ? SPINE : ""}`}>
+      <span className="absolute -top-6 left-5 flex size-12 items-center justify-center rounded-control bg-anthracite text-primary shadow-lg ring-4 ring-background md:-top-7 md:left-6 md:size-14 lg:left-9">
+        <OrganIcon title={section.title} className="size-6 md:size-7" />
       </span>
-      <span aria-hidden="true" className="absolute top-5 right-6 rounded-full bg-primary/15 px-3 py-1 font-heading text-xs font-bold tracking-widest text-brand-ink">{number(index)}</span>
+      <span aria-hidden="true" className="absolute top-4 right-5 rounded-full bg-primary/15 px-3 py-1 font-heading text-xs font-bold tracking-widest text-brand-ink">{number(index)}</span>
       <h2 id={id} className="font-heading text-xl leading-snug font-bold text-brand-ink md:text-2xl" dangerouslySetInnerHTML={{ __html: section.title }} />
       <span aria-hidden="true" className="mt-4 block h-0.5 w-12 bg-primary transition-all duration-500 group-hover:w-20" />
       <Body html={section.html} className="mt-5 text-[15px] leading-relaxed text-muted-foreground" />
@@ -59,26 +62,27 @@ function OrgCard({ section, index, className = "" }: { section: Section; index: 
 export function GovernanceCards({ sections, lang }: { sections: Section[]; lang?: string }) {
   const bottomIndex = sections.findIndex((s) => isSecretariat(s.title));
   if (sections.length !== 3 || bottomIndex === -1) {
-    return <div lang={lang} className="grid gap-12 pt-7 lg:grid-cols-3">{sections.map((s, i) => <OrgCard key={i} section={s} index={i} />)}</div>;
+    return <div lang={lang} className="grid gap-12 pt-7 lg:grid-cols-3">{sections.map((s, i) => <OrgCard key={i} section={s} index={i} connected={i > 0} />)}</div>;
   }
   const top = sections.map((s, i) => ({ s, i })).filter(({ i }) => i !== bottomIndex);
   const line = "absolute bg-primary";
   return (
-    <div lang={lang} className="relative rounded-box bg-muted/50 px-5 py-14 md:px-10">
-      <div className="grid gap-12 md:grid-cols-2 md:gap-10">
-        {top.map(({ s, i }) => <OrgCard key={i} section={s} index={i} />)}
+    // Téléphone : cartes pleine largeur sans écrin, reliées médaillon à médaillon. Tablette et plus : écrin, deux
+    // conseils en haut reliés au Secrétariat exécutif.
+    <div lang={lang} className="relative pt-6 md:rounded-box md:bg-muted/50 md:px-6 md:py-14 lg:px-10">
+      <div className="grid gap-12 md:grid-cols-2 md:gap-6 lg:gap-10">
+        {top.map(({ s, i }, n) => <OrgCard key={i} section={s} index={i} connected={n > 0} />)}
       </div>
-      {/* Liaisons des deux conseils vers le Secrétariat exécutif (grand écran) ; trait vertical sur téléphone. */}
-      <div aria-hidden="true" className="relative mx-auto my-4 h-16 md:my-0 md:h-20">
-        <span className={`${line} top-0 left-1/2 h-full w-0.5 -translate-x-1/2 md:hidden`} />
-        <span className={`${line} top-0 left-1/4 hidden h-1/2 w-0.5 md:block`} />
-        <span className={`${line} top-0 right-1/4 hidden h-1/2 w-0.5 md:block`} />
-        <span className={`${line} top-1/2 right-1/4 left-1/4 hidden h-0.5 md:block`} />
-        <span className={`${line} top-1/2 left-1/2 hidden h-1/2 w-0.5 -translate-x-1/2 md:block`} />
-        <span className="absolute top-1/2 left-1/2 hidden size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary ring-4 ring-muted md:block" />
+      {/* Grand écran : les deux conseils reliés au Secrétariat exécutif. */}
+      <div aria-hidden="true" className="relative hidden h-20 md:block">
+        <span className={`${line} top-0 left-1/4 h-1/2 w-0.5`} />
+        <span className={`${line} top-0 right-1/4 h-1/2 w-0.5`} />
+        <span className={`${line} top-1/2 right-1/4 left-1/4 h-0.5`} />
+        <span className={`${line} top-1/2 left-1/2 h-1/2 w-0.5 -translate-x-1/2`} />
+        <span className="absolute top-1/2 left-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary ring-4 ring-muted" />
       </div>
-      <div className="mt-7 md:mx-auto md:w-2/3">
-        <OrgCard section={sections[bottomIndex]!} index={bottomIndex} />
+      <div className="mt-12 md:mx-auto md:mt-7 md:w-3/4 lg:w-2/3">
+        <OrgCard section={sections[bottomIndex]!} index={bottomIndex} connected />
       </div>
     </div>
   );
