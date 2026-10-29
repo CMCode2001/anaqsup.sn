@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
         <relativePath/>
     </parent>
 
@@ -19,7 +19,7 @@
 
     <properties>
         <java.version>25</java.version>
-        <spring-modulith.version>2.1.1</spring-modulith.version>
+        <spring-modulith.version>2.1.2</spring-modulith.version>
         <springdoc.version>3.1.1</springdoc.version>
         <!-- Contrat OpenAPI (source de vérité, ADR-0001), embarqué et servi par Swagger UI -->
         <contracts.dir>${project.basedir}/../contracts/openapi</contracts.dir>
