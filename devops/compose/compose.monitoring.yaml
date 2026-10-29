@@ -3,7 +3,7 @@
 #   docker compose -f compose.yaml -f compose.monitoring.yaml --env-file … up -d
 services:
   prometheus:
-    image: prom/prometheus:v3.15.0
+    image: prom/prometheus:v3.15.1
     restart: unless-stopped
     command:
       - --config.file=/etc/prometheus/prometheus.yml
